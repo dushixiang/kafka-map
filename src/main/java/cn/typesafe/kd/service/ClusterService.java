@@ -49,6 +49,18 @@ public class ClusterService {
         }
     }
 
+    public AdminClient getAdminClient(String id) {
+        synchronized (id.intern()) {
+            AdminClient adminClient = clients.get(id);
+            if (adminClient == null) {
+                Cluster cluster = findById(id);
+                adminClient = createAdminClient(cluster.getServers());
+                clients.put(id, adminClient);
+            }
+            return adminClient;
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void create(Cluster cluster) throws ExecutionException, InterruptedException {
         String uuid = ID.uuid();

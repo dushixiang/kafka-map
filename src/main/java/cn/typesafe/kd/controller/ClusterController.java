@@ -1,15 +1,14 @@
 package cn.typesafe.kd.controller;
 
+import cn.typesafe.kd.controller.dto.PageResult;
 import cn.typesafe.kd.entity.Cluster;
 import cn.typesafe.kd.repository.ClusterRepository;
 import cn.typesafe.kd.service.ClusterService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -32,9 +31,9 @@ public class ClusterController {
     }
 
     @GetMapping("/paging")
-    public Object page(@RequestParam(defaultValue = "1") Integer pageIndex,
-                       @RequestParam(defaultValue = "10") Integer pageSize,
-                       String name) {
+    public PageResult<Cluster> page(@RequestParam(defaultValue = "1") Integer pageIndex,
+                                    @RequestParam(defaultValue = "10") Integer pageSize,
+                                    String name) {
 
         PageRequest pageRequest = PageRequest.of(pageIndex - 1, pageSize, Sort.Direction.DESC, "created");
 
@@ -47,9 +46,6 @@ public class ClusterController {
         Example<Cluster> example = Example.of(query, exampleMatcher);
         Page<Cluster> page = clusterRepository.findAll(example, pageRequest);
 
-        return Map.of(
-                "total", page.getTotalElements(),
-                "items", page.getContent()
-        );
+        return PageResult.of(page.getTotalElements(), page.getContent());
     }
 }

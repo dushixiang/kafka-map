@@ -21,4 +21,5 @@ public class Topic {
     @Column(length = 36)
     private String clusterId;
     private String name;
+    private Integer partitionsSize;
 }

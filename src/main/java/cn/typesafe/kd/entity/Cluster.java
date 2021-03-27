@@ -1,5 +1,6 @@
 package cn.typesafe.kd.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -24,5 +25,6 @@ public class Cluster {
     private String servers;
     private String controller;
     private Boolean monitor;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date created;
 }
