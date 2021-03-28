@@ -25,6 +25,9 @@ public class Cluster {
     private String servers;
     private String controller;
     private Boolean monitor;
+    private Integer topicCount;
+    private Integer brokerCount;
+    private Integer consumerCount;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date created;
 }

@@ -5,11 +5,18 @@ import cn.typesafe.kd.repository.ClusterRepository;
 import cn.typesafe.kd.util.ID;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 public class ClusterService {
 
     private final ConcurrentHashMap<String, AdminClient> clients = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, KafkaConsumer<String, String>> consumers = new ConcurrentHashMap<>();
 
     @Resource
     private ClusterRepository clusterRepository;
@@ -36,6 +44,17 @@ public class ClusterService {
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
         return AdminClient.create(properties);
+    }
+
+    private KafkaConsumer<String, String> createConsumer(String servers) {
+        Properties properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
+        properties.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-dashboard");
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "500");
+        return new KafkaConsumer<>(properties, new StringDeserializer(), new StringDeserializer());
     }
 
     public AdminClient getAdminClient(String id, String servers) {
@@ -61,6 +80,18 @@ public class ClusterService {
         }
     }
 
+    public KafkaConsumer<String, String> getConsumer(String id) {
+        synchronized (id.intern()) {
+            var kafkaConsumer = consumers.get(id);
+            if (kafkaConsumer == null) {
+                Cluster cluster = findById(id);
+                kafkaConsumer = createConsumer(cluster.getServers());
+                consumers.put(id, kafkaConsumer);
+            }
+            return kafkaConsumer;
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void create(Cluster cluster) throws ExecutionException, InterruptedException {
         String uuid = ID.uuid();
@@ -75,5 +106,14 @@ public class ClusterService {
         cluster.setCreated(new Date());
 
         clusterRepository.saveAndFlush(cluster);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteByIdIn(List<String> idList) {
+        for (String id : idList) {
+            clients.remove(id);
+            consumers.remove(id);
+            clusterRepository.deleteById(id);
+        }
     }
 }

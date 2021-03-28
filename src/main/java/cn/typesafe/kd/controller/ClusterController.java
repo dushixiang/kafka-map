@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -23,12 +25,6 @@ public class ClusterController {
     private ClusterService clusterService;
     @Resource
     private ClusterRepository clusterRepository;
-
-    @PostMapping("")
-    @ResponseStatus(value = HttpStatus.CREATED)
-    public void create(@RequestBody Cluster cluster) throws ExecutionException, InterruptedException {
-        clusterService.create(cluster);
-    }
 
     @GetMapping("/paging")
     public PageResult<Cluster> page(@RequestParam(defaultValue = "1") Integer pageIndex,
@@ -47,5 +43,22 @@ public class ClusterController {
         Page<Cluster> page = clusterRepository.findAll(example, pageRequest);
 
         return PageResult.of(page.getTotalElements(), page.getContent());
+    }
+
+    @GetMapping("")
+    public List<Cluster> items() {
+        return clusterRepository.findAll();
+    }
+
+    @PostMapping("")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void create(@RequestBody Cluster cluster) throws ExecutionException, InterruptedException {
+        clusterService.create(cluster);
+    }
+
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{ids}")
+    public void delete(@PathVariable String ids) {
+        clusterService.deleteByIdIn(Arrays.asList(ids.split(",")));
     }
 }

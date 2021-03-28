@@ -9,11 +9,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @SpringBootTest
-class KafkaDashboardApplicationTests {
+class AdminClientTests {
 
     private AdminClient adminClient;
 
@@ -107,6 +109,19 @@ class KafkaDashboardApplicationTests {
                 System.out.println("\t " + topicPartition.topic() + " " + topicPartition.partition() + " " + offsetAndMetadata.offset());
             });
         }
+    }
 
+    @Test
+    public void test() throws ExecutionException, InterruptedException {
+
+        Collection<ConsumerGroupListing> consumerGroupListings = adminClient.listConsumerGroups().all().get();
+
+        List<String> groupIdList = consumerGroupListings.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList());
+
+        Map<String, ConsumerGroupDescription> groupDescriptionMap = adminClient.describeConsumerGroups(groupIdList).all().get();
+
+        groupDescriptionMap.forEach((s, consumerGroupDescription) -> {
+            System.out.println(s + " : " + consumerGroupDescription.toString());
+        });
     }
 }

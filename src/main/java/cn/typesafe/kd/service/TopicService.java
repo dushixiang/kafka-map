@@ -1,17 +1,16 @@
 package cn.typesafe.kd.service;
 
-import cn.typesafe.kd.entity.Topic;
-import cn.typesafe.kd.repository.TopicRepository;
-import cn.typesafe.kd.util.Sign;
+import cn.typesafe.kd.entity.Cluster;
+import cn.typesafe.kd.service.dto.Topic;
+import cn.typesafe.kd.repository.ClusterRepository;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,7 @@ public class TopicService {
     @Resource
     private ClusterService clusterService;
     @Resource
-    private TopicRepository topicRepository;
+    private ClusterRepository clusterRepository;
 
     public Set<String> topicNames(String clusterId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
@@ -33,24 +32,40 @@ public class TopicService {
     }
 
     public List<Topic> topics(String clusterId) throws ExecutionException, InterruptedException {
-        AdminClient adminClient = clusterService.getAdminClient(clusterId);
-        Map<String, TopicDescription> stringTopicDescriptionMap = adminClient.describeTopics(topicNames(clusterId)).all().get();
+        List<String> clusterIds;
+        if (StringUtils.hasText(clusterId)) {
+            clusterIds = Collections.singletonList(clusterId);
+        } else {
+            clusterIds = clusterRepository.findAll().stream().map(Cluster::getId).collect(Collectors.toList());
+        }
 
-        List<Topic> topics = stringTopicDescriptionMap
-                .entrySet()
-                .stream().map(e -> {
+        List<Cluster> clusters = clusterRepository.findAllById(clusterIds);
 
-                    Topic topic = new Topic();
-                    topic.setId(Sign.sign(e.getKey(), clusterId));
-                    topic.setClusterId(clusterId);
-                    topic.setName(e.getKey());
-                    topic.setPartitionsSize(e.getValue().partitions().size());
-                    return topic;
-                })
-                .collect(Collectors.toList());
+        List<Topic> topics = new ArrayList<>();
+        for (Cluster cluster : clusters) {
+            String id = cluster.getId();
+            AdminClient adminClient = clusterService.getAdminClient(id);
+            Map<String, TopicDescription> stringTopicDescriptionMap = adminClient.describeTopics(topicNames(id)).all().get();
 
-        topicRepository.saveAll(topics);
-        topicRepository.flush();
+            List<Topic> topicList = stringTopicDescriptionMap
+                    .entrySet()
+                    .stream().map(e -> {
+                        Topic topic = new Topic();
+                        topic.setClusterId(id);
+                        topic.setClusterName(cluster.getName());
+                        topic.setName(e.getKey());
+                        topic.setPartitionsSize(e.getValue().partitions().size());
+                        return topic;
+                    })
+                    .collect(Collectors.toList());
+
+            topics.addAll(topicList);
+
+            cluster.setTopicCount(topicList.size());
+        }
+        clusterRepository.saveAll(clusters);
+        clusterRepository.flush();
+
         return topics;
     }
 }

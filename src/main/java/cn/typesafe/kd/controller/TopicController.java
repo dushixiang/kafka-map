@@ -1,6 +1,6 @@
 package cn.typesafe.kd.controller;
 
-import cn.typesafe.kd.entity.Topic;
+import cn.typesafe.kd.service.dto.Topic;
 import cn.typesafe.kd.service.TopicService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +29,7 @@ public class TopicController {
     }
 
     @GetMapping("")
-    public List<Topic> topics(@RequestParam String clusterId) throws ExecutionException, InterruptedException {
+    public List<Topic> topics(String clusterId) throws ExecutionException, InterruptedException {
         return topicService.topics(clusterId);
     }
 }

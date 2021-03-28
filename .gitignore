@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+dashboard/.idea
+dashboard/*.iml
+dashboard/node_modules
+
