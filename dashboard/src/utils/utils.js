@@ -223,6 +223,10 @@ export function renderSize(value) {
     return size + ' ' + unitArr[index];
 }
 
-export function getFileName(fullFileName){
+export function getFileName(fullFileName) {
     return fullFileName.substring(fullFileName.lastIndexOf('/') + 1, fullFileName.length);
+}
+
+export function arrayEquals(a, b) {
+    return a.length === b.length && a.sort().toString() === b.sort().toString();
 }

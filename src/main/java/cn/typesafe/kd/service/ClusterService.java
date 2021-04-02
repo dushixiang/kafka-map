@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
@@ -34,6 +31,8 @@ public class ClusterService {
 
     @Resource
     private ClusterRepository clusterRepository;
+    @Resource
+    private TopicService topicService;
 
     public Cluster findById(String id) {
         return clusterRepository.findById(id).orElseThrow(() -> new NoSuchElementException("cluster 「" + id + "」does not exist"));
@@ -102,7 +101,6 @@ public class ClusterService {
 
         cluster.setId(uuid);
         cluster.setController(controller);
-        cluster.setMonitor(true);
         cluster.setCreated(new Date());
 
         clusterRepository.saveAndFlush(cluster);
@@ -114,6 +112,13 @@ public class ClusterService {
             clients.remove(id);
             consumers.remove(id);
             clusterRepository.deleteById(id);
+        }
+    }
+
+    public void setProperties(List<Cluster> clusters) throws ExecutionException, InterruptedException {
+        for (Cluster cluster : clusters) {
+            Set<String> topicNames = topicService.topicNames(cluster.getId());
+            cluster.setTopicCount(topicNames.size());
         }
     }
 }

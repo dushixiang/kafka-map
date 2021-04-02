@@ -3,10 +3,7 @@ package cn.typesafe.kd.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -24,10 +21,13 @@ public class Cluster {
     private String name;
     private String servers;
     private String controller;
-    private Boolean monitor;
-    private Integer topicCount;
-    private Integer brokerCount;
-    private Integer consumerCount;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date created;
+
+    @Transient
+    private Integer topicCount;
+    @Transient
+    private Integer brokerCount;
+    @Transient
+    private Integer consumerCount;
 }

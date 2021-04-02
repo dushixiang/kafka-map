@@ -12,4 +12,5 @@ public class TopicOffset {
     private int partition;
     private Long offset;
     private Long logSize;
+    private String groupId;
 }

@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class Topic {
     private String clusterId;
-    private String clusterName;
     private String name;
     private Integer partitionsSize;
+    private Integer consumerGroupSize;
 }

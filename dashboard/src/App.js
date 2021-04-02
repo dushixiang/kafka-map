@@ -5,6 +5,8 @@ import {Layout, Menu, Breadcrumb, Row, Col, Space} from 'antd';
 import {ClusterOutlined, GroupOutlined, OneToOneOutlined, BorderOutlined} from '@ant-design/icons';
 import {Link, Route, Switch} from 'react-router-dom';
 import Cluster from "./components/Cluster";
+import Topic from "./components/Topic";
+import TopicInfo from "./components/TopicInfo";
 
 const {Header, Content, Footer, Sider} = Layout;
 
@@ -17,40 +19,15 @@ function App() {
                         <Header className="header">
                             <div className='kd-header'>
                                 <div className="logo"/>
-                                <Menu
-                                    theme="dark"
-                                    mode="horizontal"
-                                    defaultSelectedKeys={[]}
-                                    defaultOpenKeys={[]}
-                                >
-                                    <Menu.Item icon={<ClusterOutlined/>}>
-                                        <Link to={'/cluster'}>
-                                            集群
-                                        </Link>
-                                    </Menu.Item>
-                                    <Menu.Item icon={<BorderOutlined/>}>
-                                        <Link to={'/brokers'}>
-                                            Brokers
-                                        </Link>
-                                    </Menu.Item>
-                                    <Menu.Item icon={<OneToOneOutlined/>}>
-                                        <Link to={'/topic'}>
-                                            Topic
-                                        </Link>
-                                    </Menu.Item>
-                                    <Menu.Item icon={<GroupOutlined/>}>
-                                        <Link to={'/consumer'}>
-                                            消费组
-                                        </Link>
-                                    </Menu.Item>
-                                </Menu>
+
                             </div>
                         </Header>
                         <Content className='kd-container'>
-                            <Layout className="kd-layout">
-                                <Content className='kd-content'>
-                                    <Route path="/cluster" exact component={Cluster}/>
-                                    {/*<Route path="/deploy/:id"/>*/}
+                            <Layout>
+                                <Content>
+                                    <Route path="/" exact component={Cluster}/>
+                                    <Route path="/topic" component={Topic}/>
+                                    <Route path="/topic-info" component={TopicInfo}/>
                                 </Content>
                             </Layout>
                         </Content>

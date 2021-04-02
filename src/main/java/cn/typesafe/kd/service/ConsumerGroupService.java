@@ -1,17 +1,16 @@
 package cn.typesafe.kd.service;
 
-import cn.typesafe.kd.repository.ConsumerGroupRepository;
+import cn.typesafe.kd.service.dto.ConsumerGroup;
 import cn.typesafe.kd.service.dto.TopicOffset;
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.ConsumerGroupListing;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -24,8 +23,6 @@ public class ConsumerGroupService {
 
     @Resource
     private ClusterService clusterService;
-    @Resource
-    private ConsumerGroupRepository consumerGroupRepository;
 
     public List<TopicOffset> topicOffsets(String clusterId, String groupId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
@@ -35,7 +32,7 @@ public class ConsumerGroupService {
         Set<TopicPartition> topicPartitions = topicPartitionOffsetAndMetadataMap.keySet();
         Map<TopicPartition, Long> topicPartitionLongMap = kafkaConsumer.endOffsets(topicPartitions);
 
-        List<TopicOffset> topicOffsetList = topicPartitionOffsetAndMetadataMap.entrySet().stream().map(e -> {
+        return topicPartitionOffsetAndMetadataMap.entrySet().stream().map(e -> {
             TopicPartition topicPartition = e.getKey();
             OffsetAndMetadata offsetAndMetadata = e.getValue();
             String topic = topicPartition.topic();
@@ -44,6 +41,7 @@ public class ConsumerGroupService {
             Long logSize = topicPartitionLongMap.get(topicPartition);
 
             TopicOffset topicOffset = new TopicOffset();
+            topicOffset.setGroupId(groupId);
             topicOffset.setTopic(topic);
             topicOffset.setPartition(partition);
             topicOffset.setOffset(offset);
@@ -51,6 +49,59 @@ public class ConsumerGroupService {
 
             return topicOffset;
         }).collect(Collectors.toList());
-        return topicOffsetList;
+    }
+
+    public List<ConsumerGroup> consumerGroups(String topic, String clusterId) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+
+        Collection<ConsumerGroupListing> consumerGroupListings = adminClient.listConsumerGroups().all().get();
+        List<ConsumerGroup> consumerGroups = new ArrayList<>();
+        for (ConsumerGroupListing consumerGroupListing : consumerGroupListings) {
+            String groupId = consumerGroupListing.groupId();
+            Map<TopicPartition, OffsetAndMetadata> topicPartitionOffsetAndMetadataMap = adminClient.listConsumerGroupOffsets(groupId)
+                    .partitionsToOffsetAndMetadata()
+                    .get();
+            Set<TopicPartition> topicPartitions = topicPartitionOffsetAndMetadataMap.keySet();
+            topicPartitions.stream()
+                    .filter(topicPartition -> Objects.equals(topicPartition.topic(), topic))
+                    .findAny()
+                    .ifPresent(topicPartition -> {
+                        ConsumerGroup consumerGroup = new ConsumerGroup();
+                        consumerGroup.setGroupId(groupId);
+                        consumerGroup.setSimpleConsumerGroup(consumerGroupListing.isSimpleConsumerGroup());
+                        consumerGroups.add(consumerGroup);
+                    });
+        }
+        return consumerGroups;
+    }
+
+    public List<TopicOffset> offset(String topic, String groupId, String clusterId) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+        KafkaConsumer<String, String> kafkaConsumer = clusterService.getConsumer(clusterId);
+
+        Map<TopicPartition, OffsetAndMetadata> topicPartitionOffsetAndMetadataMap = adminClient.listConsumerGroupOffsets(groupId)
+                .partitionsToOffsetAndMetadata()
+                .get();
+        Set<TopicPartition> topicPartitions = topicPartitionOffsetAndMetadataMap.keySet();
+        Map<TopicPartition, Long> topicPartitionLongMap = kafkaConsumer.endOffsets(topicPartitions);
+        List<TopicOffset> topicOffsets = new ArrayList<>();
+
+        topicPartitions.stream()
+                .filter(topicPartition -> Objects.equals(topicPartition.topic(), topic))
+                .forEachOrdered(topicPartition -> {
+                    int partition = topicPartition.partition();
+                    OffsetAndMetadata offsetAndMetadata = topicPartitionOffsetAndMetadataMap.get(topicPartition);
+                    Long logSize = topicPartitionLongMap.get(topicPartition);
+                    long offset = offsetAndMetadata.offset();
+
+                    TopicOffset topicOffset = new TopicOffset();
+                    topicOffset.setGroupId(groupId);
+                    topicOffset.setTopic(topic);
+                    topicOffset.setPartition(partition);
+                    topicOffset.setOffset(offset);
+                    topicOffset.setLogSize(logSize);
+                    topicOffsets.add(topicOffset);
+                });
+        return topicOffsets;
     }
 }

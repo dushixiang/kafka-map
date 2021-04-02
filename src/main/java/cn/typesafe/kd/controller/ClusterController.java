@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * @author dushixiang
- * @date 2021/3/27 11:15 上午
+ * @date 2021/3/27 20:15 上午
  */
 @RequestMapping("/clusters")
 @RestController
@@ -29,7 +29,7 @@ public class ClusterController {
     @GetMapping("/paging")
     public PageResult<Cluster> page(@RequestParam(defaultValue = "1") Integer pageIndex,
                                     @RequestParam(defaultValue = "10") Integer pageSize,
-                                    String name) {
+                                    String name) throws ExecutionException, InterruptedException {
 
         PageRequest pageRequest = PageRequest.of(pageIndex - 1, pageSize, Sort.Direction.DESC, "created");
 
@@ -41,6 +41,8 @@ public class ClusterController {
 
         Example<Cluster> example = Example.of(query, exampleMatcher);
         Page<Cluster> page = clusterRepository.findAll(example, pageRequest);
+        List<Cluster> clusters = page.getContent();
+        clusterService.setProperties(clusters);
 
         return PageResult.of(page.getTotalElements(), page.getContent());
     }

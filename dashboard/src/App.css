@@ -21,11 +21,13 @@
     margin: 0 auto;
 }
 
-.kd-layout {
-    background-color: white;
+.kd-content {
     margin-top: 20px;
+    padding: 16px;
+    background-color: white;
 }
 
-.kd-content {
-    margin: 16px;
+.kd-page-header {
+    background-color: white;
+    margin-top: 20px;
 }

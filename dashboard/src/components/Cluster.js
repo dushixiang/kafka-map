@@ -12,6 +12,7 @@ import {
     UndoOutlined
 } from '@ant-design/icons';
 import ClusterModal from "./ClusterModal";
+import {Link} from "react-router-dom";
 
 const confirm = Modal.confirm;
 const {Search} = Input;
@@ -98,36 +99,10 @@ class Cluster extends Component {
         this.loadTableData(query);
     };
 
-    showModal = async (title, id = null, index) => {
-
-        let items = this.state.items;
-
-        let model = {}
-        if (id) {
-            items[index].updateBtnLoading = true;
-            this.setState({
-                items: items
-            });
-
-            let result = await request.get('/credentials/' + id);
-            if (result['code'] !== 1) {
-                message.error(result['message']);
-                items[index].updateBtnLoading = false;
-                this.setState({
-                    items: items
-                });
-                return;
-            }
-
-            items[index].updateBtnLoading = false;
-            model = result['data']
-        }
-
+    showModal = async (title) => {
         this.setState({
             modalTitle: title,
             modalVisible: true,
-            model: model,
-            items: items
         });
     };
 
@@ -185,22 +160,6 @@ class Cluster extends Component {
         }
     }
 
-    handleSearchByNickname = async nickname => {
-        const result = await request.get(`/users/paging?pageIndex=1&pageSize=100&nickname=${nickname}`);
-        if (result.code !== 1) {
-            message.error(result.message, 10);
-            return;
-        }
-
-        const items = result['data']['items'].map(item => {
-            return {'key': item['id'], 'disabled': false, ...item}
-        })
-
-        this.setState({
-            users: items
-        })
-    }
-
     render() {
 
         const columns = [{
@@ -234,6 +193,11 @@ class Cluster extends Component {
             title: 'Topic数量',
             dataIndex: 'topicCount',
             key: 'topicCount',
+            render: (topicCount, record, index) => {
+                return <Link to={`/topic?clusterId=${record['id']}&clusterName=${record['name']}`}>
+                    {topicCount}
+                </Link>
+            }
         }, {
             title: 'Broker数量',
             dataIndex: 'brokerCount',
@@ -285,7 +249,7 @@ class Cluster extends Component {
         const hasSelected = selectedRowKeys.length > 0;
 
         return (
-            <div>
+            <div className='kd-content'>
                 <div style={{marginBottom: 20}}>
 
                     <Row justify="space-around" align="middle" gutter={24}>
@@ -372,7 +336,6 @@ class Cluster extends Component {
                         showTotal: total => `总计 ${total} 条`
                     }}
                     loading={this.state.loading}
-                    onChange={this.handleTableChange}
                 />
 
                 {
