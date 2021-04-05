@@ -45,11 +45,11 @@ public class ClusterService {
         return AdminClient.create(properties);
     }
 
-    private KafkaConsumer<String, String> createConsumer(String servers) {
+    public KafkaConsumer<String, String> createConsumer(String servers, String groupId) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         properties.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-dashboard");
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "500");
@@ -84,7 +84,7 @@ public class ClusterService {
             var kafkaConsumer = consumers.get(id);
             if (kafkaConsumer == null) {
                 Cluster cluster = findById(id);
-                kafkaConsumer = createConsumer(cluster.getServers());
+                kafkaConsumer = createConsumer(cluster.getServers(), "kafka-dashboard");
                 consumers.put(id, kafkaConsumer);
             }
             return kafkaConsumer;
@@ -120,5 +120,12 @@ public class ClusterService {
             Set<String> topicNames = topicService.topicNames(cluster.getId());
             cluster.setTopicCount(topicNames.size());
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateNameById(String clusterId, String name) {
+        Cluster cluster = findById(clusterId);
+        cluster.setName(name);
+        clusterRepository.saveAndFlush(cluster);
     }
 }

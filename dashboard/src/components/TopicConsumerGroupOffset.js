@@ -1,16 +1,40 @@
 import React, {Component} from 'react';
-import {Button, Drawer, Table, Typography} from "antd";
+import {
+    Alert,
+    Button,
+    Col,
+    Drawer,
+    Form,
+    Input,
+    InputNumber,
+    Radio,
+    Row,
+    Space,
+    Table,
+    Tooltip,
+    Typography,
+    Modal
+} from "antd";
 import request from "../common/request";
-const { Title } = Typography;
+import {SyncOutlined} from "@ant-design/icons";
+
+const {Title} = Typography;
 
 class TopicConsumerGroupOffset extends Component {
+
+    form = React.createRef();
 
     state = {
         loading: false,
         items: [],
         topic: undefined,
         clusterId: undefined,
-        groupId: undefined
+        groupId: undefined,
+        resetOffsetVisible: false,
+        selectedRow: {},
+        seek: 'end',
+        resetting: false,
+        createPartitionVisible: false
     }
 
     componentDidMount() {
@@ -62,10 +86,48 @@ class TopicConsumerGroupOffset extends Component {
             render: (lag, record, index) => {
                 return record['logSize'] - record['offset']
             }
+        }, {
+            title: '操作',
+            key: 'action',
+            render: (text, record, index) => {
+                return (
+                    <div>
+                        <Button type="link" size='small' onClick={() => {
+                            this.setState({
+                                resetOffsetVisible: true,
+                                selectedRow: record
+                            })
+                        }}>重置offset</Button>
+                    </div>
+                )
+            },
         }];
 
         return (
             <div>
+                <div style={{marginBottom: 20}}>
+                    <Row justify="space-around" align="middle" gutter={24}>
+                        <Col span={20} key={1}>
+                            <Title level={3}>ConsumerGroup ID: {this.state.groupId}</Title>
+                        </Col>
+                        <Col span={4} key={2} style={{textAlign: 'right'}}>
+                            <Space>
+
+                                <Tooltip title="刷新列表">
+                                    <Button icon={<SyncOutlined/>} onClick={() => {
+                                        let clusterId = this.state.clusterId;
+                                        let topic = this.state.topic;
+                                        let groupId = this.state.groupId;
+                                        this.loadItems(clusterId, topic, groupId);
+                                    }}>
+
+                                    </Button>
+                                </Tooltip>
+                            </Space>
+                        </Col>
+                    </Row>
+                </div>
+
                 <Table key='table'
                        dataSource={this.state.items}
                        columns={columns}
@@ -79,17 +141,74 @@ class TopicConsumerGroupOffset extends Component {
                 />
 
                 <Drawer
-                    width={window.innerWidth * 0.7}
-                    placement="right"
+                    title={'Partition: ' + this.state.selectedRow['partition']}
+                    width={window.innerWidth * 0.3}
                     closable={true}
                     onClose={() => {
                         this.setState({
-                            consumerDetailVisible: false
+                            resetOffsetVisible: false
                         })
                     }}
-                    visible={this.state.consumerDetailVisible}
-                >
+                    visible={this.state.resetOffsetVisible}
+                    footer={
+                        <div
+                            style={{
+                                textAlign: 'right',
+                            }}
+                        >
+                            <Button
+                                loading={this.state.resetting}
+                                onClick={() => {
+                                    this.form.current
+                                        .validateFields()
+                                        .then(async values => {
+                                            this.setState({
+                                                resetting: true
+                                            })
+                                            let topic = this.state.topic;
+                                            let groupId = this.state.groupId;
+                                            let clusterId = this.state.clusterId;
 
+                                            await request.put(`/topics/${topic}/consumerGroups/${groupId}/offset?clusterId=${clusterId}`, values);
+                                            this.form.current.resetFields();
+                                            this.setState({
+                                                resetOffsetVisible: false
+                                            })
+                                            this.loadItems(clusterId, topic, groupId);
+                                        })
+                                        .catch(info => {
+
+                                        }).finally(() => this.setState({resetting: false}));
+                                }} type="primary">
+                                重置
+                            </Button>
+                        </div>
+                    }
+                >
+                    <Alert message="请注意" description="重置前需关闭消费者客户端。" type="warning" showIcon
+                           style={{marginBottom: 16}}/>
+
+                    <Form ref={this.form}>
+                        <Form.Item label="重置位置" name='seek' rules={[{required: true}]}>
+                            <Radio.Group onChange={(e) => {
+                                let seek = e.target.value;
+                                this.setState({
+                                    'seek': seek
+                                })
+                            }}>
+                                <Radio value={'end'}>最新</Radio>
+                                <Radio value={'beginning'}>最早</Radio>
+                                <Radio value={'custom'}>自定义</Radio>
+                            </Radio.Group>
+                        </Form.Item>
+
+                        {
+                            this.state.seek === 'custom' ?
+                                <Form.Item label="offset" name='offset' rules={[{required: true}]}>
+                                    <InputNumber min={0}/>
+                                </Form.Item> : undefined
+                        }
+                    </Form>
                 </Drawer>
             </div>
         );

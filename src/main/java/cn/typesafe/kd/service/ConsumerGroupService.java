@@ -1,6 +1,8 @@
 package cn.typesafe.kd.service;
 
+import cn.typesafe.kd.entity.Cluster;
 import cn.typesafe.kd.service.dto.ConsumerGroup;
+import cn.typesafe.kd.service.dto.ResetOffset;
 import cn.typesafe.kd.service.dto.TopicOffset;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ConsumerGroupListing;
@@ -103,5 +105,31 @@ public class ConsumerGroupService {
                     topicOffsets.add(topicOffset);
                 });
         return topicOffsets;
+    }
+
+    public void resetOffset(String topic, String groupId, String clusterId, ResetOffset resetOffset) {
+        Cluster cluster = clusterService.findById(clusterId);
+        KafkaConsumer<String, String> kafkaConsumer = null;
+        try {
+            kafkaConsumer = clusterService.createConsumer(cluster.getServers(), groupId);
+            TopicPartition topicPartition = new TopicPartition(topic, resetOffset.getPartition());
+            List<TopicPartition> topicPartitions = Collections.singletonList(topicPartition);
+
+            kafkaConsumer.assign(topicPartitions);
+            if (Objects.equals("beginning", resetOffset.getSeek())) {
+                kafkaConsumer.seek(topicPartition, 0);
+            } else if (Objects.equals("end", resetOffset.getSeek())) {
+                Map<TopicPartition, Long> topicPartitionLongMap = kafkaConsumer.endOffsets(topicPartitions);
+                Long logSize = topicPartitionLongMap.get(topicPartition);
+                kafkaConsumer.seek(topicPartition, logSize);
+            } else {
+                kafkaConsumer.seek(topicPartition, resetOffset.getOffset());
+            }
+            kafkaConsumer.commitSync();
+        } finally {
+            if (kafkaConsumer != null) {
+                kafkaConsumer.close();
+            }
+        }
     }
 }

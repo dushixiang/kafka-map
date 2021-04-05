@@ -99,10 +99,11 @@ class Cluster extends Component {
         this.loadTableData(query);
     };
 
-    showModal = async (title) => {
+    showModal = async (title, model) => {
         this.setState({
             modalTitle: title,
             modalVisible: true,
+            model: model
         });
     };
 
@@ -121,11 +122,17 @@ class Cluster extends Component {
 
         try {
             if (formData.id) {
-
+                // 向后台提交数据
+                await request.put('/clusters/' + formData.id, {'name': formData['name']});
+                message.success('修改成功', 3);
+                this.setState({
+                    modalVisible: false
+                });
+                await this.loadTableData(this.state.queryParams);
             } else {
                 // 向后台提交数据
                 await request.post('/clusters', formData);
-                message.success('操作成功', 3);
+                message.success('接入成功', 3);
                 this.setState({
                     modalVisible: false
                 });
@@ -225,14 +232,15 @@ class Cluster extends Component {
                 render: (text, record, index) => {
                     return (
                         <div>
+                            <Button type="link" size='small' onClick={() => {
+                                this.showModal('编辑集群', record)
+                            }}>编辑</Button>
                             <Popconfirm
                                 title="您确认要移除此集群吗?"
                                 onConfirm={() => this.delete(record['id'])}
                             >
                                 <Button type="text" size='small' danger>移除</Button>
                             </Popconfirm>
-
-
                         </div>
                     )
                 },

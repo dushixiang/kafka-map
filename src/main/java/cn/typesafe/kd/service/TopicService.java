@@ -110,4 +110,10 @@ public class TopicService {
         KafkaFuture<Void> all = topicsResult.all();
         all.get();
     }
+
+    public void createPartitions(String clusterId, String topic, int totalCount) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+        Map<String, NewPartitions> newPartitionsMap = Map.of(topic, NewPartitions.increaseTo(totalCount));
+        adminClient.createPartitions(newPartitionsMap).all().get();
+    }
 }

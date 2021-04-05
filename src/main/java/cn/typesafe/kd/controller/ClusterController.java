@@ -63,4 +63,9 @@ public class ClusterController {
     public void delete(@PathVariable String ids) {
         clusterService.deleteByIdIn(Arrays.asList(ids.split(",")));
     }
+
+    @PutMapping("/{clusterId}")
+    public void updateName(@PathVariable String clusterId, @RequestBody Cluster cluster) {
+        clusterService.updateNameById(clusterId, cluster.getName());
+    }
 }

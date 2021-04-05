@@ -12,20 +12,17 @@ import {
     Input,
     Divider,
     Select,
-    Popconfirm, PageHeader
+    Popconfirm, PageHeader, Form, Radio, InputNumber
 } from "antd";
-import dayjs from "dayjs";
 import request from "../common/request";
 import qs from "qs";
 import {
     DeleteOutlined,
-    DownOutlined,
     ExclamationCircleOutlined,
     PlusOutlined,
     SyncOutlined,
     UndoOutlined
 } from '@ant-design/icons';
-import ClusterModal from "./ClusterModal";
 import {Link} from "react-router-dom";
 import TopicModal from "./TopicModal";
 
@@ -33,9 +30,15 @@ const confirm = Modal.confirm;
 const {Search} = Input;
 const {Title, Text} = Typography;
 
-class Cluster extends Component {
+const formItemLayout = {
+    labelCol: {span: 6},
+    wrapperCol: {span: 14},
+};
+
+class Topic extends Component {
 
     inputRefOfName = React.createRef();
+    form = React.createRef();
 
     state = {
         items: [],
@@ -48,7 +51,9 @@ class Cluster extends Component {
         loading: false,
         modalVisible: false,
         clusterId: undefined,
-        clusterName: undefined
+        clusterName: undefined,
+        selectedRow: {},
+        createPartitionConfirmLoading: false
     }
 
     componentDidMount() {
@@ -141,12 +146,8 @@ class Cluster extends Component {
         try {
             await request.post('/topics/batch-delete?clusterId=' + this.state.clusterId, [name]);
             message.success('删除成功');
-            await this.loadTableData(this.state.queryParams);
         } finally {
-            items[index]['deleting'] = false;
-            this.setState({
-                items: items
-            });
+            this.loadTableData(this.state.queryParams);
         }
     }
 
@@ -214,7 +215,12 @@ class Cluster extends Component {
                     render: (text, record, index) => {
                         return (
                             <div>
-                                <Button type="link" size='small'>分区扩容</Button>
+                                <Button type="link" size='small' onClick={() => {
+                                    this.setState({
+                                        createPartitionVisible: true,
+                                        selectedRow: record
+                                    })
+                                }}>分区扩容</Button>
 
                                 <Popconfirm
                                     title="您确认要删除此Topic吗?"
@@ -350,6 +356,45 @@ class Cluster extends Component {
                                 model={this.state.model}
                             /> : undefined
                     }
+
+                    <Modal title="分区扩容"
+                           visible={this.state.createPartitionVisible}
+                           confirmLoading={this.state.createPartitionConfirmLoading}
+                           onOk={() => {
+                               this.form.current
+                                   .validateFields()
+                                   .then(async values => {
+                                       this.setState({
+                                           createPartitionConfirmLoading: true
+                                       })
+                                       let topic = this.state.selectedRow['name'];
+                                       let clusterId = this.state.clusterId;
+
+                                       await request.post(`/topics/${topic}/partitions?clusterId=${clusterId}&totalCount=${values['totalCount']}`);
+                                       this.form.current.resetFields();
+                                       this.setState({
+                                           createPartitionVisible: false
+                                       })
+                                       this.loadTableData();
+                                   })
+                                   .catch(info => {
+
+                                   }).finally(() => this.setState({createPartitionConfirmLoading: false}));
+                           }}
+                           onCancel={() => {
+                               this.setState({
+                                   createPartitionVisible: false
+                               })
+                           }}>
+                        <Form ref={this.form} {...formItemLayout}>
+                            <Form.Item label="总分区数量" name='totalCount' rules={[{required: true}]}>
+                                <InputNumber min={this.state.selectedRow['partitionsSize']}
+                                             placeholder={'不能小于当前分区数量：' + this.state.selectedRow["partitionsSize"]}
+                                             style={{width: '100%'}}/>
+                            </Form.Item>
+                        </Form>
+                    </Modal>
+
                 </div>
             </div>
 
@@ -357,4 +402,4 @@ class Cluster extends Component {
     }
 }
 
-export default Cluster;
+export default Topic;

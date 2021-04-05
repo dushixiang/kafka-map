@@ -66,4 +66,14 @@ public class TopicController {
     public List<TopicOffset> offset(@PathVariable String topic, @PathVariable String groupId, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
         return consumerGroupService.offset(topic, groupId, clusterId);
     }
+
+    @PutMapping("/{topic}/consumerGroups/{groupId}/offset")
+    public void resetOffset(@PathVariable String topic, @PathVariable String groupId, @RequestParam String clusterId, @RequestBody ResetOffset resetOffset) throws ExecutionException, InterruptedException {
+        consumerGroupService.resetOffset(topic, groupId, clusterId, resetOffset);
+    }
+
+    @PostMapping("/{topic}/partitions")
+    public void createPartitions(@PathVariable String topic, @RequestParam String clusterId, @RequestParam Integer totalCount) throws ExecutionException, InterruptedException {
+        topicService.createPartitions(clusterId, topic, totalCount);
+    }
 }

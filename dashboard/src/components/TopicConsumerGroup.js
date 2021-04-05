@@ -75,8 +75,8 @@ class TopicConsumerGroup extends Component {
                 />
 
                 <Drawer
-                    title={'消费组ID：' + this.state.selectedRow['groupId']}
-                    width={window.innerWidth * 0.7}
+                    title={'Topic：' + this.state.topic}
+                    width={window.innerWidth * 0.8}
                     placement="right"
                     closable={true}
                     onClose={() => {

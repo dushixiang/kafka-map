@@ -48,9 +48,14 @@ const ClusterModal = ({title, handleOk, handleCancel, confirmLoading, model}) =>
                     <Input placeholder="请输入集群名称"/>
                 </Form.Item>
 
-                <Form.Item label="broker地址" name='servers' rules={[{required: true, message: '请输入broker地址'}]}>
-                    <TextArea placeholder="请输入broker地址，例如 172.18.0.1:9092,172.18.0.2:9092,172.18.0.3:9092"/>
-                </Form.Item>
+                {
+                    model['id'] === undefined ?
+                        <Form.Item label="broker地址" name='servers' rules={[{required: true, message: '请输入broker地址'}]}>
+                            <TextArea rows={4}
+                                      placeholder="请输入broker地址，例如 172.18.0.1:9092,172.18.0.2:9092,172.18.0.3:9092"/>
+                        </Form.Item> : undefined
+                }
+
 
             </Form>
         </Modal>
