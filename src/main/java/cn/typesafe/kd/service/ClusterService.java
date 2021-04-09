@@ -50,11 +50,15 @@ public class ClusterService {
     }
 
     public KafkaConsumer<String, String> createConsumer(String servers, String groupId) {
+        return createConsumer(servers,groupId, "earliest");
+    }
+
+    public KafkaConsumer<String, String> createConsumer(String servers, String groupId, String offsetResetConfig) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         properties.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetResetConfig);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "500");
         return new KafkaConsumer<>(properties, new StringDeserializer(), new StringDeserializer());

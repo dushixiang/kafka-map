@@ -2,6 +2,7 @@ package cn.typesafe.kd.controller;
 
 import cn.typesafe.kd.service.BrokerService;
 import cn.typesafe.kd.service.ConsumerGroupService;
+import cn.typesafe.kd.service.MessageService;
 import cn.typesafe.kd.service.dto.*;
 import cn.typesafe.kd.service.TopicService;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,8 @@ public class TopicController {
     private BrokerService brokerService;
     @Resource
     private ConsumerGroupService consumerGroupService;
+    @Resource
+    private MessageService messageService;
 
     @GetMapping("/names")
     public Set<String> topicNames(@RequestParam String clusterId) throws ExecutionException, InterruptedException {
@@ -75,5 +78,12 @@ public class TopicController {
     @PostMapping("/{topic}/partitions")
     public void createPartitions(@PathVariable String topic, @RequestParam String clusterId, @RequestParam Integer totalCount) throws ExecutionException, InterruptedException {
         topicService.createPartitions(clusterId, topic, totalCount);
+    }
+
+    @GetMapping("/{topic}/data")
+    public List<ConsumerMessage> data(@PathVariable String topic, @RequestParam String clusterId,
+                                      @RequestParam(defaultValue = "latest") String offsetResetConfig,
+                                      @RequestParam(defaultValue = "100") Integer count) {
+        return messageService.data(clusterId, topic, offsetResetConfig, count);
     }
 }

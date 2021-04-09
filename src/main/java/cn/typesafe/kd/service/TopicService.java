@@ -1,19 +1,18 @@
 package cn.typesafe.kd.service;
 
+import cn.typesafe.kd.entity.Cluster;
 import cn.typesafe.kd.repository.ClusterRepository;
-import cn.typesafe.kd.service.dto.Broker;
-import cn.typesafe.kd.service.dto.Partition;
-import cn.typesafe.kd.service.dto.Topic;
-import cn.typesafe.kd.service.dto.TopicForCreate;
+import cn.typesafe.kd.service.dto.*;
 import org.apache.kafka.clients.admin.*;
-import org.apache.kafka.common.KafkaFuture;
-import org.apache.kafka.common.Node;
-import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.TopicPartitionInfo;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -175,4 +174,5 @@ public class TopicService {
         Map<String, NewPartitions> newPartitionsMap = Map.of(topic, NewPartitions.increaseTo(totalCount));
         adminClient.createPartitions(newPartitionsMap).all().get();
     }
+
 }
