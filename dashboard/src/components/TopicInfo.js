@@ -40,6 +40,12 @@ class TopicInfo extends Component {
                         }}
                         title={this.state.topic}
                         subTitle=""
+                        extra={[
+                            <Button key="2">导入数据</Button>,
+                            <Button key="1" type="primary">
+                                拉取数据
+                            </Button>,
+                        ]}
                     />
                 </div>
 
@@ -65,14 +71,6 @@ class TopicInfo extends Component {
                                 topic={this.state.topic}>
 
                             </TopicConsumerGroup>
-                        </TabPane>
-
-                        <TabPane tab="数据" key='data'>
-                            <TopicData
-                                clusterId={this.state.clusterId}
-                                topic={this.state.topic}>
-
-                            </TopicData>
                         </TabPane>
                     </Tabs>
                 </div>

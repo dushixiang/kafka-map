@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
 import request from "../common/request";
-import {Button, Drawer, Space, Table, Tooltip} from "antd";
+import {Button, Drawer, Table} from "antd";
 import TopicConsumerGroupOffset from "./TopicConsumerGroupOffset";
-import Modal from "antd/es/modal/Modal";
 
 class TopicConsumerGroup extends Component {
 
@@ -66,6 +65,7 @@ class TopicConsumerGroup extends Component {
                     dataSource={this.state.items}
                     columns={columns}
                     position={'both'}
+                    size={'middle'}
                     loading={this.state.loading}
                     pagination={{
                         showSizeChanger: true,

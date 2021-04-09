@@ -33,7 +33,7 @@ public class TopicController {
     }
 
     @GetMapping("")
-    public List<Topic> topics(String clusterId, String name) throws ExecutionException, InterruptedException {
+    public List<Topic> topics(@RequestParam String clusterId, String name) throws ExecutionException, InterruptedException {
         return topicService.topics(clusterId, name);
     }
 

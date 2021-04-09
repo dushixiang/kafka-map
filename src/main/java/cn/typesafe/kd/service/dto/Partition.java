@@ -20,6 +20,7 @@ public class Partition {
         private int id;
         private String host;
         private int port;
+        private Long logSize = 0L;
 
         public Node() {
         }

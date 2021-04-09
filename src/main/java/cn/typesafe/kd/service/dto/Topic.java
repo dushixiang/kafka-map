@@ -12,4 +12,6 @@ public class Topic {
     private String name;
     private Integer partitionsSize;
     private Integer consumerGroupSize;
+    private Integer replicaSize;
+    private Long totalLogSize;
 }

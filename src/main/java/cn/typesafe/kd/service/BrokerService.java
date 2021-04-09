@@ -52,32 +52,35 @@ public class BrokerService {
         }
 
         Map<String, TopicDescription> stringTopicDescriptionMap = adminClient.describeTopics(topicNames).all().get();
-        TopicDescription topicDescription = stringTopicDescriptionMap.get(topic);
-
-        List<TopicPartitionInfo> partitions = topicDescription.partitions();
-        for (TopicPartitionInfo partitionInfo : partitions) {
-            Node leader = partitionInfo.leader();
-            for (Broker broker : brokers) {
-                if (broker.getId() == leader.id()) {
-                    broker.getLeaderPartitions().add(partitionInfo.partition());
-                    break;
-                }
-            }
-
-            List<Node> replicas = partitionInfo.replicas();
-            for (Broker broker : brokers) {
-                for (Node replica : replicas) {
-                    if (broker.getId() == replica.id()) {
-                        broker.getFollowerPartitions().add(partitionInfo.partition());
+        for (TopicDescription topicDescription : stringTopicDescriptionMap.values()) {
+            List<TopicPartitionInfo> partitions = topicDescription.partitions();
+            for (TopicPartitionInfo partitionInfo : partitions) {
+                Node leader = partitionInfo.leader();
+                for (Broker broker : brokers) {
+                    if (broker.getId() == leader.id()) {
+                        broker.getLeaderPartitions().add(partitionInfo.partition());
                         break;
+                    }
+                }
+
+                List<Node> replicas = partitionInfo.replicas();
+                for (Broker broker : brokers) {
+                    for (Node replica : replicas) {
+                        if (broker.getId() == replica.id()) {
+                            broker.getFollowerPartitions().add(partitionInfo.partition());
+                            break;
+                        }
                     }
                 }
             }
         }
 
-        brokers = brokers.stream()
-                .filter(broker -> broker.getFollowerPartitions().size() > 0 || broker.getLeaderPartitions().size() > 0)
-                .collect(Collectors.toList());
+        if (StringUtils.hasText(topic)) {
+            // 使用topic过滤时只展示相关的broker
+            brokers = brokers.stream()
+                    .filter(broker -> broker.getFollowerPartitions().size() > 0 || broker.getLeaderPartitions().size() > 0)
+                    .collect(Collectors.toList());
+        }
 
         return brokers;
     }

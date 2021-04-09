@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Button, Space, Table, Tooltip} from "antd";
-import {arrayEquals} from "../utils/utils";
+import {arrayEquals, renderSize} from "../utils/utils";
 import request from "../common/request";
 
 class TopicPartition extends Component {
@@ -45,13 +45,29 @@ class TopicPartition extends Component {
                 </Tooltip>
             }
         }, {
+            title: '数据大小',
+            dataIndex: 'y',
+            key: 'y',
+            sorter: (a, b) => a['replicas'].map(item => item['logSize']).reduce((a, b) => a + b, 0) - b['replicas'].map(item => item['logSize']).reduce((a, b) => a + b, 0),
+            render: (y, record) => {
+                let totalLogSize = record['replicas'].map(item => item['logSize']).reduce((a, b) => a + b, 0);
+                if (totalLogSize < 0) {
+                    return '不支持';
+                }
+                return renderSize(totalLogSize)
+            }
+        }, {
             title: 'Replicas',
             dataIndex: 'replicas',
             key: 'replicas',
             render: (replicas, record, index) => {
                 return <Space>
                     {replicas.map(item => {
-                        return <Tooltip title={item['host'] + ":" + item['port']}>
+                        let logSize = ''
+                        if (item['logSize'] > 0) {
+                            logSize = renderSize(item['logSize']);
+                        }
+                        return <Tooltip title={item['host'] + ":" + item['port'] + ' ' + logSize}>
                             <Button size='small'>{item['id']}</Button>
                         </Tooltip>
                     })}
@@ -86,6 +102,7 @@ class TopicPartition extends Component {
                     dataSource={this.state.items}
                     columns={columns}
                     position={'both'}
+                    size={'middle'}
                     loading={this.state.loading}
                     pagination={{
                         showSizeChanger: true,

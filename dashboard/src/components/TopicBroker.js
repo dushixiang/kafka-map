@@ -69,6 +69,7 @@ class TopicBroker extends Component {
                     columns={columns}
                     position={'both'}
                     loading={this.state.loading}
+                    size={'middle'}
                     pagination={{
                         showSizeChanger: true,
                         total: this.state.items.length,

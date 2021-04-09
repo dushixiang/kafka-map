@@ -25,6 +25,7 @@ import {
 } from '@ant-design/icons';
 import {Link} from "react-router-dom";
 import TopicModal from "./TopicModal";
+import {renderSize} from "../utils/utils";
 
 const confirm = Modal.confirm;
 const {Search} = Input;
@@ -42,7 +43,6 @@ class Topic extends Component {
 
     state = {
         items: [],
-        clusters: [],
         selectedRowKeys: [],
         queryParams: {
             pageIndex: 1,
@@ -208,6 +208,34 @@ class Topic extends Component {
                 dataIndex: 'partitionsSize',
                 key: 'partitionsSize',
                 sorter: (a, b) => a['partitionsSize'] - b['partitionsSize'],
+            }, {
+                title: '副本数量',
+                dataIndex: 'replicaSize',
+                key: 'replicaSize',
+                sorter: (a, b) => a['replicaSize'] - b['replicaSize'],
+            }, {
+                title: '数据大小/副本',
+                dataIndex: 'x',
+                key: 'x',
+                sorter: (a, b) => a['totalLogSize'] / a['replicaSize'] - b['totalLogSize'] / b['replicaSize'],
+                render: (x, record) => {
+                    if (record['totalLogSize'] < 0) {
+                        return '不支持';
+                    }
+                    return renderSize(record['totalLogSize'] / record['replicaSize'])
+                }
+            }, {
+                title: '数据大小',
+                dataIndex: 'totalLogSize',
+                key: 'totalLogSize',
+                sorter: (a, b) => a['totalLogSize'] - b['totalLogSize'],
+                render: (totalLogSize) => {
+                    if (totalLogSize < 0) {
+                        return '不支持';
+                    } else {
+                        return renderSize(totalLogSize);
+                    }
+                }
             },
                 {
                     title: '操作',
@@ -247,9 +275,6 @@ class Topic extends Component {
         };
         const hasSelected = selectedRowKeys.length > 0;
 
-        const clusterOptions = this.state.clusters.map(d => <Select.Option key={d.id}
-                                                                           value={d.id}>{d.name}</Select.Option>);
-
         return (
             <div>
                 <div className='kd-page-header'>
@@ -281,7 +306,12 @@ class Topic extends Component {
 
                                         <Button icon={<UndoOutlined/>} onClick={() => {
                                             this.inputRefOfName.current.setValue('');
-                                            this.loadTableData({pageIndex: 1, pageSize: 10, clusterId: '', name: ''})
+                                            this.loadTableData({
+                                                pageIndex: 1,
+                                                pageSize: 10,
+                                                clusterId: this.state.clusterId,
+                                                name: ''
+                                            })
                                         }}>
 
                                         </Button>
@@ -338,6 +368,7 @@ class Topic extends Component {
                         dataSource={this.state.items}
                         columns={columns}
                         position={'both'}
+                        size={'middle'}
                         loading={this.state.loading}
                         pagination={{
                             showSizeChanger: true,
