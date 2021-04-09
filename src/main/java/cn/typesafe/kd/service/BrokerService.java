@@ -29,6 +29,11 @@ public class BrokerService {
 //    public List<Broker> brokers() {
 //
 //    }
+    public int countBroker(String clusterId) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+        DescribeClusterResult describeClusterResult = adminClient.describeCluster();
+        return describeClusterResult.nodes().get().size();
+    }
 
     public List<Broker> brokers(String topic, String clusterId) throws ExecutionException, InterruptedException {
 

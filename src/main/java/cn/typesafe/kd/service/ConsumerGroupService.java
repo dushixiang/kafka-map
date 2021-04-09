@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -53,6 +54,11 @@ public class ConsumerGroupService {
         }).collect(Collectors.toList());
     }
 
+    public int countConsumerGroup(String clusterId) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+        return adminClient.listConsumerGroups().all().get().size();
+    }
+
     public List<ConsumerGroup> consumerGroups(String topic, String clusterId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
 
@@ -65,7 +71,12 @@ public class ConsumerGroupService {
                     .get();
             Set<TopicPartition> topicPartitions = topicPartitionOffsetAndMetadataMap.keySet();
             topicPartitions.stream()
-                    .filter(topicPartition -> Objects.equals(topicPartition.topic(), topic))
+                    .filter(topicPartition -> {
+                        if (!StringUtils.hasText(topic)) {
+                            return true;
+                        }
+                        return Objects.equals(topicPartition.topic(), topic);
+                    })
                     .findAny()
                     .ifPresent(topicPartition -> {
                         ConsumerGroup consumerGroup = new ConsumerGroup();

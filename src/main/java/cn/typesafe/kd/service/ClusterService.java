@@ -33,6 +33,10 @@ public class ClusterService {
     private ClusterRepository clusterRepository;
     @Resource
     private TopicService topicService;
+    @Resource
+    private BrokerService brokerService;
+    @Resource
+    private ConsumerGroupService consumerGroupService;
 
     public Cluster findById(String id) {
         return clusterRepository.findById(id).orElseThrow(() -> new NoSuchElementException("cluster 「" + id + "」does not exist"));
@@ -119,6 +123,8 @@ public class ClusterService {
         for (Cluster cluster : clusters) {
             Set<String> topicNames = topicService.topicNames(cluster.getId());
             cluster.setTopicCount(topicNames.size());
+            cluster.setBrokerCount(brokerService.countBroker(cluster.getId()));
+            cluster.setConsumerCount(consumerGroupService.countConsumerGroup(cluster.getId()));
         }
     }
 

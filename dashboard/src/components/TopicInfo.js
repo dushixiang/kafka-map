@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
-import {Button, PageHeader, Tabs, Tag, Tooltip} from "antd";
+import {Button, Drawer, PageHeader, Tabs, Tag, Tooltip} from "antd";
 import TopicPartition from "./TopicPartition";
 import TopicBroker from "./TopicBroker";
 import TopicConsumerGroup from "./TopicConsumerGroup";
 import TopicData from "./TopicData";
+import TopicConsumerGroupOffset from "./TopicConsumerGroupOffset";
 
 const {TabPane} = Tabs;
 
@@ -11,7 +12,8 @@ class TopicInfo extends Component {
 
     state = {
         clusterId: undefined,
-        topic: undefined
+        topic: undefined,
+        topicDataVisible: false
     }
 
     componentDidMount() {
@@ -42,7 +44,11 @@ class TopicInfo extends Component {
                         subTitle=""
                         extra={[
                             <Button key="2">导入数据</Button>,
-                            <Button key="1" type="primary">
+                            <Button key="1" type="primary" onClick={() => {
+                                this.setState({
+                                    topicDataVisible: true
+                                })
+                            }}>
                                 拉取数据
                             </Button>,
                         ]}
@@ -74,6 +80,28 @@ class TopicInfo extends Component {
                         </TabPane>
                     </Tabs>
                 </div>
+
+                <Drawer
+                    title={'Topic：' + this.state.topic}
+                    width={window.innerWidth * 0.8}
+                    placement="right"
+                    closable={true}
+                    onClose={() => {
+                        this.setState({
+                            topicDataVisible: false
+                        })
+                    }}
+                    visible={this.state.topicDataVisible}
+                >
+                    {
+                        this.state.topicDataVisible ?
+                            <TopicData
+                                clusterId={this.state.clusterId}
+                                topic={this.state.topic}
+                            /> : undefined
+                    }
+
+                </Drawer>
             </div>
         );
     }

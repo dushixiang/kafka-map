@@ -209,10 +209,20 @@ class Cluster extends Component {
             title: 'Broker数量',
             dataIndex: 'brokerCount',
             key: 'brokerCount',
+            render: (brokerCount, record, index) => {
+                return <Link to={`/broker?clusterId=${record['id']}&clusterName=${record['name']}`}>
+                    {brokerCount}
+                </Link>
+            }
         }, {
             title: '消费者数量',
             dataIndex: 'consumerCount',
             key: 'consumerCount',
+            render: (consumerCount, record, index) => {
+                return <Link to={`/consumer-group?clusterId=${record['id']}&clusterName=${record['name']}`}>
+                    {consumerCount}
+                </Link>
+            }
         }, {
             title: '创建时间',
             dataIndex: 'created',

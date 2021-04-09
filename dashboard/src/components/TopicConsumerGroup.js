@@ -65,7 +65,7 @@ class TopicConsumerGroup extends Component {
                     dataSource={this.state.items}
                     columns={columns}
                     position={'both'}
-                    size={'middle'}
+                    size={'small'}
                     loading={this.state.loading}
                     pagination={{
                         showSizeChanger: true,
