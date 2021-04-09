@@ -42,7 +42,7 @@ class TopicBroker extends Component {
             dataIndex: 'port',
             key: 'port',
         }, {
-            title: 'Leader Partitions',
+            title: 'Partitions as Leader',
             dataIndex: 'leaderPartitions',
             key: 'leaderPartitions',
             render: (leaderPartitions, record, index) => {
@@ -51,7 +51,7 @@ class TopicBroker extends Component {
                 </Tooltip>;
             }
         }, {
-            title: 'Follower Partitions',
+            title: 'Partitions as Follower',
             dataIndex: 'followerPartitions',
             key: 'followerPartitions',
             render: (followerPartitions, record, index) => {

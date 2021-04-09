@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
-import {Button, PageHeader, Popconfirm, Space, Table, Tabs, Tag, Tooltip} from "antd";
-import {Link} from "react-router-dom";
-import request from "../common/request";
+import {Button, PageHeader, Tabs, Tag, Tooltip} from "antd";
 import TopicPartition from "./TopicPartition";
 import TopicBroker from "./TopicBroker";
 import TopicConsumerGroup from "./TopicConsumerGroup";
+import TopicData from "./TopicData";
 
 const {TabPane} = Tabs;
 
@@ -68,6 +67,13 @@ class TopicInfo extends Component {
                             </TopicConsumerGroup>
                         </TabPane>
 
+                        <TabPane tab="数据" key='data'>
+                            <TopicData
+                                clusterId={this.state.clusterId}
+                                topic={this.state.topic}>
+
+                            </TopicData>
+                        </TabPane>
                     </Tabs>
                 </div>
             </div>
