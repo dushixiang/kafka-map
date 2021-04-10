@@ -1,8 +1,27 @@
 import React, {Component} from 'react';
-import {Col, Row, Select, Form, Button, Table, Tooltip, InputNumber} from "antd";
+import {
+    Row,
+    Select,
+    Form,
+    Button,
+    Typography,
+    Tooltip,
+    InputNumber,
+    PageHeader,
+    List,
+    Space,
+    Statistic, Col
+} from "antd";
 import request from "../common/request";
 import qs from "qs";
 import dayjs from "dayjs";
+
+import {
+    RightCircleTwoTone,
+    DownCircleTwoTone
+} from '@ant-design/icons';
+
+const {Text} = Typography;
 
 class TopicData extends Component {
 
@@ -12,15 +31,26 @@ class TopicData extends Component {
         topic: undefined,
         clusterId: undefined,
         loading: false,
-        items: []
+        items: [],
+        topicInfo: undefined,
+        partition: 0
     }
 
     componentDidMount() {
-        let clusterId = this.props.clusterId;
-        let topic = this.props.topic;
+        let urlParams = new URLSearchParams(this.props.location.search);
+        let clusterId = urlParams.get('clusterId');
+        let topic = urlParams.get('topic');
         this.setState({
             clusterId: clusterId,
             topic: topic
+        })
+        this.loadTopicInfo(clusterId, topic);
+    }
+
+    loadTopicInfo = async (clusterId, topic) => {
+        let result = await request.get(`/topics/${topic}?clusterId=${clusterId}`);
+        this.setState({
+            topicInfo: result
         })
     }
 
@@ -45,96 +75,161 @@ class TopicData extends Component {
 
     render() {
 
-        const columns = [{
-            title: 'partition',
-            dataIndex: 'partition',
-            key: 'partition'
-        }, {
-            title: 'offset',
-            dataIndex: 'offset',
-            key: 'offset',
-            defaultSortOrder: 'ascend',
-        }, {
-            title: 'key',
-            dataIndex: 'key',
-            key: 'key',
-        }, {
-            title: 'value',
-            dataIndex: 'value',
-            key: 'value',
-            render: (value) => {
-                if (value.length > 60) {
-                    value = value.substring(0, 57) + '...';
-                }
-                return value;
-            }
-        }, {
-            title: 'timestamp',
-            dataIndex: 'timestamp',
-            key: 'timestamp',
-            render: (timestamp, record, index) => {
-                return (
-                    <Tooltip title={dayjs(timestamp).format("YYYY-MM-DD HH:mm:ss")}>
-                        {dayjs(timestamp).fromNow()}
-                    </Tooltip>
-                )
-            }
-        }];
-
         return (
             <div>
-                <Form ref={this.form} onFinish={this.pullMessage}
-                      initialValues={{offsetResetConfig: 'earliest', count: '10'}}>
-                    <Row gutter={24}>
-                        <Col span={4} key='1'>
-                            <Form.Item
-                                name={'offsetResetConfig'}
-                                label={'拉取位置'}
-                            >
-                                <Select style={{width: 120}} onChange={() => {
+                <div className='kd-page-header'>
+                    <PageHeader
+                        className="site-page-header"
+                        onBack={() => {
+                            this.props.history.goBack();
+                        }}
+                        title={this.state.topic}
+                        subTitle="拉取数据"
+                    >
+                        <Row>
+                            <Space size='large'>
+                                {
+                                    this.state.topicInfo ?
+                                        <>
+                                            <Statistic title="Beginning Offset"
+                                                       value={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}/>
+                                            <Statistic title="End Offset"
+                                                       value={this.state.topicInfo['partitions'][this.state.partition]['endOffset']}/>
+                                            <Statistic title="Size"
+                                                       value={this.state.topicInfo['partitions'][this.state.partition]['endOffset'] - this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}/>
+                                        </>
+                                        : undefined
+                                }
 
-                                }}>
-                                    <Select.Option value="earliest">Oldest</Select.Option>
-                                    <Select.Option value="latest">Newest</Select.Option>
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={4}>
-                            <Form.Item
-                                name={'count'}
-                                label={'数据量'}
-                            >
-                                <InputNumber min={1}
-                                             style={{width: 120}}/>
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
+                            </Space>
+                        </Row>
+                    </PageHeader>
+                </div>
 
-                        </Col>
-                        <Col span={8} style={{textAlign: 'right'}}>
-                            <Button type="primary" htmlType="submit">
+                <div className='kd-page-header' style={{padding: 20}}>
+                    <Form ref={this.form} layout="inline" onFinish={this.pullMessage}
+                          initialValues={{
+                              offset: 0,
+                              count: 10,
+                              partition: 0
+                          }}>
+                        <Form.Item
+                            name={'partition'}
+                            label={'Partition'}
+                        >
+                            <Select style={{width: 120}} onChange={(value) => {
+                                this.setState({
+                                    partition: value
+                                })
+                            }}>
+                                {
+                                    this.state.topicInfo ?
+                                        this.state.topicInfo['partitions'].map(item => {
+                                            return <Select.Option
+                                                value={item['partition']}>{item['partition']}</Select.Option>
+                                        }) : undefined
+                                }
+                            </Select>
+                        </Form.Item>
+                        <Form.Item
+                            name={'offset'}
+                            label={'Offset'}
+                        >
+                            <InputNumber min={0}
+                                         style={{width: 120}}/>
+                        </Form.Item>
+                        <Form.Item
+                            name={'count'}
+                            label={'消息数量'}
+                        >
+                            <InputNumber min={1}
+                                         style={{width: 120}}/>
+                        </Form.Item>
+
+                        <Form.Item shouldUpdate>
+                            <Button type="primary" htmlType="submit" loading={this.state.loading}>
                                 拉取
                             </Button>
-                        </Col>
-                    </Row>
-                </Form>
+                        </Form.Item>
 
-                <Table
-                    rowKey='id'
-                    dataSource={this.state.items}
-                    columns={columns}
-                    position={'both'}
-                    loading={this.state.loading}
-                    size={'middle'}
-                    pagination={{
-                        showSizeChanger: true,
-                        total: this.state.items.length,
-                        showTotal: total => `总计 ${total} 条`
-                    }}
-                />
+                        <Form.Item shouldUpdate>
+                            <Button type="default" danger onClick={() => {
+                                this.setState({
+                                    items: []
+                                })
+                            }}>
+                                清空
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </div>
+
+                <div className='kd-content'>
+                    <List
+                        itemLayout="horizontal"
+                        dataSource={this.state.items}
+                        loading={this.state.loading}
+                        renderItem={(item, index) => {
+                            const title = <>
+                                <Space>
+                                    <Text code>partition:</Text>
+                                    <Text>{item['partition']}</Text>
+                                    <Text code>offset:</Text>
+                                    <Text>{item['offset']}</Text>
+                                    <Text code>timestamp:</Text>:
+                                    <Tooltip
+                                        title={dayjs(item['timestamp']).format("YYYY-MM-DD HH:mm:ss")}>
+                                        <Text>{dayjs(item['timestamp']).fromNow()}</Text>
+                                    </Tooltip>
+                                </Space>
+                            </>;
+
+                            const description = <Row wrap={false}>
+                                <Col flex="none">
+                                    <div style={{padding: '0 5px'}}>
+                                        {
+                                            item['format'] ?
+                                                <DownCircleTwoTone onClick={() => {
+                                                    let items = this.state.items;
+                                                    items[index]['format'] = undefined;
+                                                    this.setState({
+                                                        items: items
+                                                    })
+                                                }}/> :
+                                                <RightCircleTwoTone onClick={() => {
+                                                    let items = this.state.items;
+                                                    try {
+                                                        let obj = JSON.parse(items[index]['value']);
+                                                        items[index]['format'] = JSON.stringify(obj, null, 4);
+                                                        this.setState({
+                                                            items: items
+                                                        })
+                                                    } catch (e) {
+
+                                                    }
+                                                }}/>
+                                        }
+                                    </div>
+                                </Col>
+                                <Col flex="auto">
+                                    <pre>{item['format'] ? item['format'] : item['value']}</pre>
+                                </Col>
+                            </Row>;
+
+
+                            return <List.Item>
+                                <List.Item.Meta
+                                    title={title}
+                                    description={description}
+                                />
+                            </List.Item>;
+                        }}
+                    />
+                </div>
             </div>
         );
     }
+
 }
 
 export default TopicData;

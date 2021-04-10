@@ -197,7 +197,7 @@ class Topic extends Component {
                 key: 'name',
                 defaultSortOrder: 'ascend',
                 sorter: (a, b) => a.name.localeCompare(b.name),
-                width: window.innerWidth * 0.4,
+                width: window.innerWidth * 0.3,
                 render: (name, record, index) => {
                     return <Link to={`/topic-info?clusterId=${record['clusterId']}&topic=${name}`}>
                         {name}

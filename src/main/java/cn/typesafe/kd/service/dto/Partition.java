@@ -14,6 +14,8 @@ public class Partition {
     private Node leader;
     private List<Node> isr;
     private List<Node> replicas;
+    private long beginningOffset;
+    private long endOffset;
 
     @Data
     public static class Node {

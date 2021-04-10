@@ -1,5 +1,6 @@
 package cn.typesafe.kd.service;
 
+import cn.typesafe.kd.config.Constant;
 import cn.typesafe.kd.entity.Cluster;
 import cn.typesafe.kd.repository.ClusterRepository;
 import cn.typesafe.kd.util.ID;
@@ -27,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 public class ClusterService {
 
     private final ConcurrentHashMap<String, AdminClient> clients = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, KafkaConsumer<String, String>> consumers = new ConcurrentHashMap<>();
 
     @Resource
     private ClusterRepository clusterRepository;
@@ -49,18 +49,19 @@ public class ClusterService {
         return AdminClient.create(properties);
     }
 
-    public KafkaConsumer<String, String> createConsumer(String servers, String groupId) {
-        return createConsumer(servers,groupId, "earliest");
+    public KafkaConsumer<String, String> createConsumer(String clusterId) {
+        Cluster cluster = findById(clusterId);
+        return createConsumer(cluster.getServers(), Constant.CONSUMER_GROUP_ID);
     }
 
-    public KafkaConsumer<String, String> createConsumer(String servers, String groupId, String offsetResetConfig) {
+    public KafkaConsumer<String, String> createConsumer(String servers, String groupId) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
-        properties.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
+        properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "100");
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetResetConfig);
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
-        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "500");
+        properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         return new KafkaConsumer<>(properties, new StringDeserializer(), new StringDeserializer());
     }
 
@@ -87,18 +88,6 @@ public class ClusterService {
         }
     }
 
-    public KafkaConsumer<String, String> getConsumer(String id) {
-        synchronized (id.intern()) {
-            var kafkaConsumer = consumers.get(id);
-            if (kafkaConsumer == null) {
-                Cluster cluster = findById(id);
-                kafkaConsumer = createConsumer(cluster.getServers(), "kafka-dashboard");
-                consumers.put(id, kafkaConsumer);
-            }
-            return kafkaConsumer;
-        }
-    }
-
     @Transactional(rollbackFor = Exception.class)
     public void create(Cluster cluster) throws ExecutionException, InterruptedException {
         String uuid = ID.uuid();
@@ -118,7 +107,6 @@ public class ClusterService {
     public void deleteByIdIn(List<String> idList) {
         for (String id : idList) {
             clients.remove(id);
-            consumers.remove(id);
             clusterRepository.deleteById(id);
         }
     }

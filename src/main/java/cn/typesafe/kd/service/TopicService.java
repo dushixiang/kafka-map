@@ -1,18 +1,13 @@
 package cn.typesafe.kd.service;
 
-import cn.typesafe.kd.entity.Cluster;
-import cn.typesafe.kd.repository.ClusterRepository;
 import cn.typesafe.kd.service.dto.*;
 import org.apache.kafka.clients.admin.*;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -27,8 +22,6 @@ public class TopicService {
     private ClusterService clusterService;
     @Resource
     private BrokerService brokerService;
-    @Resource
-    private ClusterRepository clusterRepository;
 
     public Set<String> topicNames(String clusterId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
@@ -38,7 +31,6 @@ public class TopicService {
 
     public List<Topic> topics(String clusterId, String name) throws ExecutionException, InterruptedException {
 
-        AdminClient adminClient = clusterService.getAdminClient(clusterId);
         Set<String> topicNames = topicNames(clusterId);
         if (StringUtils.hasText(name)) {
             topicNames = topicNames
@@ -46,6 +38,11 @@ public class TopicService {
                     .filter(topic -> topic.toLowerCase().contains(name))
                     .collect(Collectors.toSet());
         }
+        return topics(clusterId, topicNames);
+    }
+
+    public List<Topic> topics(String clusterId, Set<String> topicNames) throws InterruptedException, ExecutionException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
         Map<String, TopicDescription> stringTopicDescriptionMap = adminClient.describeTopics(topicNames).all().get();
 
         List<Topic> topics = stringTopicDescriptionMap
@@ -94,64 +91,137 @@ public class TopicService {
         return topics;
     }
 
-    public List<Partition> partitions(String topic, String clusterId) throws ExecutionException, InterruptedException {
+    public TopicInfo info(String clusterId, String topicName) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
-        Map<String, TopicDescription> stringTopicDescriptionMap = adminClient.describeTopics(Collections.singletonList(topic)).all().get();
-        TopicDescription topicDescription = stringTopicDescriptionMap.get(topic);
+        try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
+            TopicDescription topicDescription = adminClient.describeTopics(List.of(topicName)).all().get().get(topicName);
+            TopicInfo topicInfo = new TopicInfo();
+            topicInfo.setClusterId(clusterId);
+            topicInfo.setName(topicName);
 
-        List<TopicPartitionInfo> partitions = topicDescription.partitions();
-        Iterator<TopicPartitionInfo> iterator = partitions.iterator();
-        List<Partition> partitionArrayList = new ArrayList<>(partitions.size());
-        while (iterator.hasNext()) {
-            TopicPartitionInfo partitionInfo = iterator.next();
-            Node leader = partitionInfo.leader();
+            List<TopicPartitionInfo> partitionInfos = topicDescription.partitions();
+            int replicaSize = 0;
+            for (TopicPartitionInfo topicPartitionInfo : partitionInfos) {
+                replicaSize += topicPartitionInfo.replicas().size();
+            }
+            topicInfo.setReplicaSize(replicaSize);
 
-            Partition partition = new Partition();
-            partition.setPartition(partitionInfo.partition());
-            partition.setLeader(new Partition.Node(leader.id(), leader.host(), leader.port()));
+            List<TopicPartition> topicPartitions = partitionInfos.stream().map(x -> new TopicPartition(topicName, x.partition())).collect(Collectors.toList());
+            Map<TopicPartition, Long> beginningOffsets = kafkaConsumer.beginningOffsets(topicPartitions);
+            Map<TopicPartition, Long> endOffsets = kafkaConsumer.endOffsets(topicPartitions);
 
-            List<Partition.Node> isr = partitionInfo.isr().stream().map(node -> new Partition.Node(node.id(), node.host(), node.port())).collect(Collectors.toList());
-            List<Partition.Node> replicas = partitionInfo.replicas().stream().map(node -> new Partition.Node(node.id(), node.host(), node.port())).collect(Collectors.toList());
+            List<TopicInfo.Partition> partitions = topicPartitions
+                    .stream()
+                    .map(topicPartition -> {
+                        Long beginningOffset = beginningOffsets.get(topicPartition);
+                        Long endOffset = endOffsets.get(topicPartition);
+                        return new TopicInfo.Partition(topicPartition.partition(), beginningOffset, endOffset);
+                    })
+                    .collect(Collectors.toList());
 
-            partition.setIsr(isr);
-            partition.setReplicas(replicas);
+            topicInfo.setPartitions(partitions);
 
-            partitionArrayList.add(partition);
+
+            List<Integer> brokerIds = brokerService.brokers(topicName, clusterId).stream().map(Broker::getId).collect(Collectors.toList());
+            Map<Integer, Map<String, LogDirDescription>> integerMapMap;
+            try {
+                integerMapMap = adminClient.describeLogDirs(brokerIds).allDescriptions().get();
+                topicInfo.setTotalLogSize(0L);
+                for (Map<String, LogDirDescription> descriptionMap : integerMapMap.values()) {
+                    for (LogDirDescription logDirDescription : descriptionMap.values()) {
+                        Map<TopicPartition, ReplicaInfo> topicPartitionReplicaInfoMap = logDirDescription.replicaInfos();
+                        for (Map.Entry<TopicPartition, ReplicaInfo> replicaInfoEntry : topicPartitionReplicaInfoMap.entrySet()) {
+                            TopicPartition topicPartition = replicaInfoEntry.getKey();
+                            if (!Objects.equals(topicName, topicPartition.topic())) {
+                                continue;
+                            }
+                            ReplicaInfo replicaInfo = replicaInfoEntry.getValue();
+                            long size = replicaInfo.size();
+                            topicInfo.setTotalLogSize(topicInfo.getTotalLogSize() + size);
+                        }
+                    }
+                }
+            } catch (InterruptedException | ExecutionException ignored) {
+                topicInfo.setTotalLogSize(-1L);
+            }
+            return topicInfo;
         }
+    }
 
-        List<Integer> brokerIds = brokerService.brokers(topic, clusterId).stream().map(Broker::getId).collect(Collectors.toList());
-        Map<Integer, Map<String, LogDirDescription>> integerMapMap = null;
-        try {
-            integerMapMap = adminClient.describeLogDirs(brokerIds).allDescriptions().get();
-        } catch (InterruptedException | ExecutionException ignored) {
-            for (Partition partition : partitionArrayList) {
-                for (Partition.Node replica : partition.getReplicas()) {
-                    replica.setLogSize(-1L);
+    public List<Partition> partitions(String topicName, String clusterId) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+        try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
+            Map<String, TopicDescription> stringTopicDescriptionMap = adminClient.describeTopics(Collections.singletonList(topicName)).all().get();
+            TopicDescription topicDescription = stringTopicDescriptionMap.get(topicName);
+
+            List<TopicPartitionInfo> partitionInfos = topicDescription.partitions();
+            List<TopicPartition> topicPartitions = partitionInfos.stream().map(x -> new TopicPartition(topicName, x.partition())).collect(Collectors.toList());
+            Map<TopicPartition, Long> beginningOffsets = kafkaConsumer.beginningOffsets(topicPartitions);
+            Map<TopicPartition, Long> endOffsets = kafkaConsumer.endOffsets(topicPartitions);
+
+            Iterator<TopicPartitionInfo> iterator = partitionInfos.iterator();
+            List<Partition> partitionArrayList = new ArrayList<>(partitionInfos.size());
+            while (iterator.hasNext()) {
+                TopicPartitionInfo partitionInfo = iterator.next();
+                Node leader = partitionInfo.leader();
+
+                Partition partition = new Partition();
+                partition.setPartition(partitionInfo.partition());
+                partition.setLeader(new Partition.Node(leader.id(), leader.host(), leader.port()));
+
+                List<Partition.Node> isr = partitionInfo.isr().stream().map(node -> new Partition.Node(node.id(), node.host(), node.port())).collect(Collectors.toList());
+                List<Partition.Node> replicas = partitionInfo.replicas().stream().map(node -> new Partition.Node(node.id(), node.host(), node.port())).collect(Collectors.toList());
+
+                partition.setIsr(isr);
+                partition.setReplicas(replicas);
+
+                partitionArrayList.add(partition);
+
+                for (TopicPartition topicPartition : topicPartitions) {
+                    if (partition.getPartition() == topicPartition.partition()) {
+                        Long beginningOffset = beginningOffsets.get(topicPartition);
+                        Long endOffset = endOffsets.get(topicPartition);
+                        partition.setBeginningOffset(beginningOffset);
+                        partition.setEndOffset(endOffset);
+                        break;
+                    }
                 }
             }
-        }
-        if (integerMapMap != null) {
-            for (Partition partition : partitionArrayList) {
-                for (Partition.Node replica : partition.getReplicas()) {
-                    Map<String, LogDirDescription> logDirDescriptionMap = integerMapMap.get(replica.getId());
-                    if (logDirDescriptionMap != null) {
-                        for (LogDirDescription logDirDescription : logDirDescriptionMap.values()) {
-                            Map<TopicPartition, ReplicaInfo> topicPartitionReplicaInfoMap = logDirDescription.replicaInfos();
-                            for (Map.Entry<TopicPartition, ReplicaInfo> replicaInfoEntry : topicPartitionReplicaInfoMap.entrySet()) {
-                                TopicPartition topicPartition = replicaInfoEntry.getKey();
-                                if (Objects.equals(topic, topicPartition.topic()) && topicPartition.partition() == partition.getPartition()) {
-                                    ReplicaInfo replicaInfo = replicaInfoEntry.getValue();
-                                    long size = replicaInfo.size();
-                                    replica.setLogSize(replica.getLogSize() + size);
+
+            List<Integer> brokerIds = brokerService.brokers(topicName, clusterId).stream().map(Broker::getId).collect(Collectors.toList());
+            Map<Integer, Map<String, LogDirDescription>> integerMapMap = null;
+            try {
+                integerMapMap = adminClient.describeLogDirs(brokerIds).allDescriptions().get();
+            } catch (InterruptedException | ExecutionException ignored) {
+                for (Partition partition : partitionArrayList) {
+                    for (Partition.Node replica : partition.getReplicas()) {
+                        replica.setLogSize(-1L);
+                    }
+                }
+            }
+            if (integerMapMap != null) {
+                for (Partition partition : partitionArrayList) {
+                    for (Partition.Node replica : partition.getReplicas()) {
+                        Map<String, LogDirDescription> logDirDescriptionMap = integerMapMap.get(replica.getId());
+                        if (logDirDescriptionMap != null) {
+                            for (LogDirDescription logDirDescription : logDirDescriptionMap.values()) {
+                                Map<TopicPartition, ReplicaInfo> topicPartitionReplicaInfoMap = logDirDescription.replicaInfos();
+                                for (Map.Entry<TopicPartition, ReplicaInfo> replicaInfoEntry : topicPartitionReplicaInfoMap.entrySet()) {
+                                    TopicPartition topicPartition = replicaInfoEntry.getKey();
+                                    if (Objects.equals(topicName, topicPartition.topic()) && topicPartition.partition() == partition.getPartition()) {
+                                        ReplicaInfo replicaInfo = replicaInfoEntry.getValue();
+                                        long size = replicaInfo.size();
+                                        replica.setLogSize(replica.getLogSize() + size);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
 
-        return partitionArrayList;
+            return partitionArrayList;
+        }
     }
 
     public void createTopic(TopicForCreate topic) throws ExecutionException, InterruptedException {

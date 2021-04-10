@@ -50,6 +50,11 @@ public class TopicController {
         topicService.deleteTopic(clusterId, topics);
     }
 
+    @GetMapping("/{topic}")
+    public TopicInfo info(@PathVariable String topic, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
+        return topicService.info(clusterId, topic);
+    }
+
     @GetMapping("/{topic}/partitions")
     public List<Partition> partitions(@PathVariable String topic, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
         return topicService.partitions(topic, clusterId);
@@ -82,8 +87,9 @@ public class TopicController {
 
     @GetMapping("/{topic}/data")
     public List<ConsumerMessage> data(@PathVariable String topic, @RequestParam String clusterId,
-                                      @RequestParam(defaultValue = "latest") String offsetResetConfig,
+                                      @RequestParam(defaultValue = "0") Integer partition,
+                                      @RequestParam(defaultValue = "0") Long offset,
                                       @RequestParam(defaultValue = "100") Integer count) {
-        return messageService.data(clusterId, topic, offsetResetConfig, count);
+        return messageService.data(clusterId, topic, partition, offset, count);
     }
 }

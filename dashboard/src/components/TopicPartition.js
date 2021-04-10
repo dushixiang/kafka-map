@@ -45,6 +45,16 @@ class TopicPartition extends Component {
                 </Tooltip>
             }
         }, {
+            title: 'beginningOffset',
+            dataIndex: 'beginningOffset',
+            key: 'beginningOffset',
+            defaultSortOrder: 'ascend',
+        }, {
+            title: 'endOffset',
+            dataIndex: 'endOffset',
+            key: 'endOffset',
+            defaultSortOrder: 'ascend',
+        }, {
             title: '数据大小',
             dataIndex: 'y',
             key: 'y',

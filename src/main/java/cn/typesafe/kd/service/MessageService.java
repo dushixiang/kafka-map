@@ -1,5 +1,6 @@
 package cn.typesafe.kd.service;
 
+import cn.typesafe.kd.config.Constant;
 import cn.typesafe.kd.entity.Cluster;
 import cn.typesafe.kd.service.dto.ConsumerMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -8,6 +9,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.time.Duration;
@@ -27,55 +30,57 @@ public class MessageService {
     @Resource
     private ClusterService clusterService;
 
-    public List<ConsumerMessage> data(String clusterId, String topic, String offsetResetConfig, int count) {
-        Cluster cluster = clusterService.findById(clusterId);
-        KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(cluster.getServers(), "kafka-dashboard", offsetResetConfig);
-        List<PartitionInfo> partitionInfos = kafkaConsumer.partitionsFor(topic);
-        List<TopicPartition> topicPartitions = partitionInfos.stream().map(x -> new TopicPartition(x.topic(), x.partition())).collect(Collectors.toList());
-        kafkaConsumer.assign(topicPartitions);
-        Map<TopicPartition, Long> endOffsets = kafkaConsumer.endOffsets(topicPartitions);
+    public List<ConsumerMessage> data(String clusterId, String topicName, Integer tPartition, Long startOffset, int count) {
+        try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
 
-        for (TopicPartition topicPartition : topicPartitions) {
-            long latestOffset = Math.max(0, endOffsets.get(topicPartition) - 1);
-            kafkaConsumer.seek(topicPartition, Math.max(0, latestOffset - count));
-        }
+            TopicPartition topicPartition = new TopicPartition(topicName, tPartition);
+            List<TopicPartition> topicPartitions = List.of(topicPartition);
+            kafkaConsumer.assign(topicPartitions);
 
-        int totalCount = count * topicPartitions.size();
-        Map<TopicPartition, List<ConsumerRecord<String, String>>> rawRecords
-                = topicPartitions.stream().collect(Collectors.toMap(p -> p, p -> new ArrayList<>(count)));
-
-        boolean hasMoreRecord = true;
-        while (rawRecords.size() < totalCount && hasMoreRecord) {
-            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
-            hasMoreRecord = false;
-            for (TopicPartition partition : records.partitions()) {
-                List<ConsumerRecord<String, String>> recordList = records.records(partition);
-                if (recordList == null || recordList.isEmpty()) {
-                    continue;
-                }
-                rawRecords.get(partition).addAll(recordList);
-                hasMoreRecord = recordList.get(recordList.size() - 1).offset() < endOffsets.get(partition) - 1;
+            Long beginningOffset = kafkaConsumer.beginningOffsets(topicPartitions).get(topicPartition);
+            if (startOffset < beginningOffset) {
+                startOffset = beginningOffset;
             }
+            kafkaConsumer.seek(topicPartition, startOffset);
+
+            Long endOffset = kafkaConsumer.endOffsets(topicPartitions).get(topicPartition);
+            long currentOffset = startOffset - 1;
+
+            final var records = new ArrayList<ConsumerRecord<String, String>>(count);
+
+            var emptyPoll = 0;
+            while (records.size() < count && currentOffset < endOffset) {
+                var polled = kafkaConsumer.poll(Duration.ofMillis(200)).records(topicPartition);
+
+                if (!CollectionUtils.isEmpty(polled)) {
+                    records.addAll(polled);
+                    currentOffset = polled.get(polled.size() - 1).offset();
+                    emptyPoll = 0;
+                } else if (++emptyPoll == 3) {
+                    break;
+                }
+            }
+
+            return records
+                    .subList(0, Math.min(count, records.size()))
+                    .stream()
+                    .map(record -> {
+                        int partition = record.partition();
+                        long timestamp = record.timestamp();
+                        String key = record.key();
+                        String value = record.value();
+                        long offset = record.offset();
+
+                        ConsumerMessage consumerMessage = new ConsumerMessage();
+                        consumerMessage.setTopic(topicName);
+                        consumerMessage.setOffset(offset);
+                        consumerMessage.setPartition(partition);
+                        consumerMessage.setTimestamp(timestamp);
+                        consumerMessage.setKey(key);
+                        consumerMessage.setValue(value);
+
+                        return consumerMessage;
+                    }).collect(Collectors.toList());
         }
-        return rawRecords.values()
-                .stream()
-                .flatMap(Collection::stream)
-                .map(record -> {
-                    int partition = record.partition();
-                    long timestamp = record.timestamp();
-                    String key = record.key();
-                    String value = record.value();
-                    long offset = record.offset();
-
-                    ConsumerMessage consumerMessage = new ConsumerMessage();
-                    consumerMessage.setTopic(topic);
-                    consumerMessage.setOffset(offset);
-                    consumerMessage.setPartition(partition);
-                    consumerMessage.setTimestamp(timestamp);
-                    consumerMessage.setKey(key);
-                    consumerMessage.setValue(value);
-
-                    return consumerMessage;
-                }).collect(Collectors.toList());
     }
 }
