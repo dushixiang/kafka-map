@@ -53,7 +53,7 @@ const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model}) => {
                 </Form.Item>
 
                 <Form.Item label="副本数量" name='replicationFactor' rules={[{required: true}]}>
-                    <InputNumber min={1} style={{width: '100%'}} placeholder={'副本数量不能大于集群broker数量：'}/>
+                    <InputNumber min={1} style={{width: '100%'}} placeholder={'副本数量不能大于集群broker数量'}/>
                 </Form.Item>
 
             </Form>
