@@ -1,0 +1,32 @@
+.header {
+    padding: 0;
+}
+
+.km-header {
+    color: white;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.ka-header-logo {
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    color: white;
+}
+
+.km-container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.kd-content {
+    margin-top: 20px;
+    padding: 16px;
+    background-color: white;
+}
+
+.kd-page-header {
+    background-color: white;
+    margin-top: 20px;
+}
