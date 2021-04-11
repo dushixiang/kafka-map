@@ -215,7 +215,7 @@ class Cluster extends Component {
                 </Link>
             }
         }, {
-            title: '消费者数量',
+            title: '消费组数量',
             dataIndex: 'consumerCount',
             key: 'consumerCount',
             render: (consumerCount, record, index) => {

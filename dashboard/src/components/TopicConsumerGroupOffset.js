@@ -68,22 +68,27 @@ class TopicConsumerGroupOffset extends Component {
             defaultSortOrder: 'ascend',
             sorter: (a, b) => a['partition'] - b['partition'],
         }, {
-            title: 'Offset',
-            dataIndex: 'offset',
-            key: 'offset',
-            sorter: (a, b) => a['offset'] - b['offset'],
+            title: 'Beginning Offset',
+            dataIndex: 'beginningOffset',
+            key: 'beginningOffset',
+            sorter: (a, b) => a['beginningOffset'] - b['beginningOffset'],
         }, {
-            title: 'LogSize',
-            dataIndex: 'logSize',
-            key: 'logSize',
-            sorter: (a, b) => a['logSize'] - b['logSize'],
+            title: 'End Offset',
+            dataIndex: 'endOffset',
+            key: 'endOffset',
+            sorter: (a, b) => a['endOffset'] - b['endOffset'],
+        }, {
+            title: 'Consumer Offset',
+            dataIndex: 'consumerOffset',
+            key: 'consumerOffset',
+            sorter: (a, b) => a['consumerOffset'] - b['consumerOffset'],
         }, {
             title: 'Lag',
             dataIndex: 'lag',
             key: 'lag',
             sorter: (a, b) => a['lag'] - b['lag'],
             render: (lag, record, index) => {
-                return record['logSize'] - record['offset']
+                return record['endOffset'] - record['consumerOffset']
             }
         }, {
             title: '操作',
@@ -107,11 +112,10 @@ class TopicConsumerGroupOffset extends Component {
                 <div style={{marginBottom: 20}}>
                     <Row justify="space-around" align="middle" gutter={24}>
                         <Col span={20} key={1}>
-                            <Title level={3}>ConsumerGroup ID: {this.state.groupId}</Title>
+                            <Title level={3}>消费详情</Title>
                         </Col>
                         <Col span={4} key={2} style={{textAlign: 'right'}}>
                             <Space>
-
                                 <Tooltip title="刷新列表">
                                     <Button icon={<SyncOutlined/>} onClick={() => {
                                         let clusterId = this.state.clusterId;

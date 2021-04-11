@@ -1,13 +1,15 @@
 import React from 'react';
 import 'antd/dist/antd.css';
 import './App.css';
-import {Layout, Menu, Breadcrumb, Row, Col, Space} from 'antd';
-import {ClusterOutlined, GroupOutlined, OneToOneOutlined, BorderOutlined} from '@ant-design/icons';
-import {Link, Route, Switch} from 'react-router-dom';
+import {Layout} from 'antd';
+import {Route, Switch} from 'react-router-dom';
 import Cluster from "./components/Cluster";
 import Topic from "./components/Topic";
 import TopicInfo from "./components/TopicInfo";
 import TopicData from "./components/TopicData";
+import Broker from "./components/Broker";
+import ConsumerGroup from "./components/ConsumerGroup";
+import ConsumerGroupInfo from "./components/ConsumerGroupInfo";
 
 const {Header, Content, Footer, Sider} = Layout;
 
@@ -28,6 +30,9 @@ function App() {
                                 <Content>
                                     <Route path="/" exact component={Cluster}/>
                                     <Route path="/topic" component={Topic}/>
+                                    <Route path="/broker" component={Broker}/>
+                                    <Route path="/consumer-group" component={ConsumerGroup}/>
+                                    <Route path="/consumer-group-info" component={ConsumerGroupInfo}/>
                                     <Route path="/topic-info" component={TopicInfo}/>
                                     <Route path="/topic-data" component={TopicData}/>
                                 </Content>

@@ -1,10 +1,9 @@
 package cn.typesafe.kd.controller;
 
 import cn.typesafe.kd.service.ConsumerGroupService;
-import cn.typesafe.kd.service.dto.TopicOffset;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import cn.typesafe.kd.service.dto.ConsumerGroup;
+import cn.typesafe.kd.service.dto.ConsumerGroupInfo;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -21,8 +20,18 @@ public class ConsumerGroupController {
     @Resource
     private ConsumerGroupService consumerGroupService;
 
+    @GetMapping("/{groupId}")
+    public ConsumerGroupInfo info(@PathVariable String groupId, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
+        return consumerGroupService.info(clusterId, groupId);
+    }
+
     @GetMapping("")
-    public List<TopicOffset> topicOffsets(String clusterId, String groupId) throws ExecutionException, InterruptedException {
-        return consumerGroupService.topicOffsets(clusterId, groupId);
+    public List<ConsumerGroup> list(@RequestParam String clusterId, String groupId) throws ExecutionException, InterruptedException {
+        return consumerGroupService.consumerGroup(clusterId, groupId);
+    }
+
+    @DeleteMapping("/{groupId}")
+    public void delete(@PathVariable String groupId, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
+        consumerGroupService.delete(clusterId, groupId);
     }
 }

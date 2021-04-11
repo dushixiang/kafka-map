@@ -10,8 +10,8 @@ import lombok.Data;
 public class Topic {
     private String clusterId;
     private String name;
-    private Integer partitionsSize;
-    private Integer consumerGroupSize;
-    private Integer replicaSize;
+    private Integer partitionsCount;
+    private Integer consumerGroupCount;
+    private Integer replicaCount;
     private Long totalLogSize;
 }

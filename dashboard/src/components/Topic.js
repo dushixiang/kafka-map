@@ -205,24 +205,24 @@ class Topic extends Component {
                 }
             }, {
                 title: '分区数量',
-                dataIndex: 'partitionsSize',
-                key: 'partitionsSize',
-                sorter: (a, b) => a['partitionsSize'] - b['partitionsSize'],
+                dataIndex: 'partitionsCount',
+                key: 'partitionsCount',
+                sorter: (a, b) => a['partitionsCount'] - b['partitionsCount'],
             }, {
                 title: '副本数量',
-                dataIndex: 'replicaSize',
-                key: 'replicaSize',
-                sorter: (a, b) => a['replicaSize'] - b['replicaSize'],
+                dataIndex: 'replicaCount',
+                key: 'replicaCount',
+                sorter: (a, b) => a['replicaCount'] - b['replicaCount'],
             }, {
                 title: '数据大小/副本',
                 dataIndex: 'x',
                 key: 'x',
-                sorter: (a, b) => a['totalLogSize'] / a['replicaSize'] - b['totalLogSize'] / b['replicaSize'],
+                sorter: (a, b) => a['totalLogSize'] / a['replicaCount'] - b['totalLogSize'] / b['replicaCount'],
                 render: (x, record) => {
                     if (record['totalLogSize'] < 0) {
                         return '不支持';
                     }
-                    return renderSize(record['totalLogSize'] / record['replicaSize'])
+                    return renderSize(record['totalLogSize'] / record['replicaCount'])
                 }
             }, {
                 title: '数据大小',

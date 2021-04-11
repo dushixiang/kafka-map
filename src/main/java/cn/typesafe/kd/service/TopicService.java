@@ -51,9 +51,9 @@ public class TopicService {
                     Topic topic = new Topic();
                     topic.setClusterId(clusterId);
                     topic.setName(e.getKey());
-                    topic.setPartitionsSize(e.getValue().partitions().size());
+                    topic.setPartitionsCount(e.getValue().partitions().size());
                     topic.setTotalLogSize(0L);
-                    topic.setReplicaSize(0);
+                    topic.setReplicaCount(0);
                     return topic;
                 })
                 .collect(Collectors.toList());
@@ -80,7 +80,7 @@ public class TopicService {
                             }
                             ReplicaInfo replicaInfo = replicaInfoEntry.getValue();
                             long size = replicaInfo.size();
-                            topic.setReplicaSize(topic.getReplicaSize() + 1);
+                            topic.setReplicaCount(topic.getReplicaCount() + 1);
                             topic.setTotalLogSize(topic.getTotalLogSize() + size);
                         }
                     }
@@ -100,11 +100,11 @@ public class TopicService {
             topicInfo.setName(topicName);
 
             List<TopicPartitionInfo> partitionInfos = topicDescription.partitions();
-            int replicaSize = 0;
+            int replicaCount = 0;
             for (TopicPartitionInfo topicPartitionInfo : partitionInfos) {
-                replicaSize += topicPartitionInfo.replicas().size();
+                replicaCount += topicPartitionInfo.replicas().size();
             }
-            topicInfo.setReplicaSize(replicaSize);
+            topicInfo.setReplicaCount(replicaCount);
 
             List<TopicPartition> topicPartitions = partitionInfos.stream().map(x -> new TopicPartition(topicName, x.partition())).collect(Collectors.toList());
             Map<TopicPartition, Long> beginningOffsets = kafkaConsumer.beginningOffsets(topicPartitions);

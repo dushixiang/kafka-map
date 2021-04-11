@@ -12,7 +12,7 @@ import java.util.List;
 public class TopicInfo {
     private String clusterId;
     private String name;
-    private Integer replicaSize;
+    private Integer replicaCount;
     private Long totalLogSize;
     private List<Partition> partitions;
 

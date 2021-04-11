@@ -45,15 +45,15 @@ class TopicPartition extends Component {
                 </Tooltip>
             }
         }, {
-            title: 'beginningOffset',
+            title: 'Beginning Offset',
             dataIndex: 'beginningOffset',
             key: 'beginningOffset',
-            defaultSortOrder: 'ascend',
+            sorter: (a, b) => a['beginningOffset'] - b['beginningOffset'],
         }, {
-            title: 'endOffset',
+            title: 'End Offset',
             dataIndex: 'endOffset',
             key: 'endOffset',
-            defaultSortOrder: 'ascend',
+            sorter: (a, b) => a['endOffset'] - b['endOffset'],
         }, {
             title: '数据大小',
             dataIndex: 'y',

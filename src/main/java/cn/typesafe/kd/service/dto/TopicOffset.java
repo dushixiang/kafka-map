@@ -10,7 +10,8 @@ import lombok.Data;
 public class TopicOffset {
     private String topic;
     private int partition;
-    private Long offset;
-    private Long logSize;
+    private Long consumerOffset;
+    private Long beginningOffset;
+    private Long endOffset;
     private String groupId;
 }

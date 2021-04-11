@@ -50,11 +50,11 @@ class TopicConsumerGroup extends Component {
                 }}>{groupId}</Button>;
             }
         }, {
-            title: 'SimpleConsumerGroup',
-            dataIndex: 'simpleConsumerGroup',
-            key: 'simpleConsumerGroup',
-            render: (simpleConsumerGroup) => {
-                return simpleConsumerGroup ? '是' : '否';
+            title: 'Lag',
+            dataIndex: 'lag',
+            key: 'lag',
+            render: (lag) => {
+                return lag;
             }
         }];
 

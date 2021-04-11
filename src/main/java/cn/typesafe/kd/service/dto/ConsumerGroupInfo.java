@@ -6,11 +6,10 @@ import java.util.Set;
 
 /**
  * @author dushixiang
- * @date 2021/4/2 20:35 下午
+ * @date 2021/4/11 7:31 下午
  */
 @Data
-public class ConsumerGroup {
+public class ConsumerGroupInfo {
     private String groupId;
-    private Long lag;
     private Set<String> topics;
 }

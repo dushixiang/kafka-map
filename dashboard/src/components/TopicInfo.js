@@ -66,7 +66,7 @@ class TopicInfo extends Component {
                         <Row>
                             <Space size='large'>
                                 <Statistic title="分区数量" value={this.state.topicInfo['partitions'].length}/>
-                                <Statistic title="副本数量" value={this.state.topicInfo['replicaSize']}/>
+                                <Statistic title="副本数量" value={this.state.topicInfo['replicaCount']}/>
                                 <Statistic title="数据大小" value={renderSize(this.state.topicInfo['totalLogSize'])}/>
                             </Space>
                         </Row>
