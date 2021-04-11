@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:sqlite:kafka-dashboard.db
+    url: jdbc:sqlite:data/kafka-map.db
     driver-class-name: org.sqlite.JDBC
   jpa:
     hibernate:
