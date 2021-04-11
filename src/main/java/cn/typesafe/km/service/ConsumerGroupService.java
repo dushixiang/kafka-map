@@ -168,7 +168,7 @@ public class ConsumerGroupService {
 
     public ConsumerGroupInfo info(String clusterId, String groupId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
-        ConsumerGroupDescription consumerGroupDescription = adminClient.describeConsumerGroups(List.of(groupId)).all().get().get(groupId);
+        ConsumerGroupDescription consumerGroupDescription = adminClient.describeConsumerGroups(Collections.singletonList(groupId)).all().get().get(groupId);
         Set<String> topicNames = consumerGroupDescription
                 .members()
                 .stream()
@@ -185,6 +185,6 @@ public class ConsumerGroupService {
 
     public void delete(String clusterId, String groupId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
-        adminClient.deleteConsumerGroups(List.of(groupId)).all().get();
+        adminClient.deleteConsumerGroups(Collections.singletonList(groupId)).all().get();
     }
 }
