@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>cn.typesafe</groupId>
-    <artifactId>kafka-dashboard</artifactId>
+    <artifactId>kafka-map</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>kafka-manager</name>
+    <name>kafka-map</name>
     <description>a simple kafka manager</description>
     <properties>
         <java.version>11</java.version>
@@ -26,17 +26,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -53,12 +42,7 @@
             <artifactId>kafka-clients</artifactId>
             <version>2.7.0</version>
         </dependency>
-        <dependency>
-            <scope>compile</scope>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>30.1-jre</version>
-        </dependency>
+
         <dependency>
             <groupId>com.github.gwenn</groupId>
             <artifactId>sqlite-dialect</artifactId>
