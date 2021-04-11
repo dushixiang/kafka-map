@@ -123,10 +123,4 @@ class AdminClientTests {
             System.out.println(s + " : " + consumerGroupDescription.toString());
         });
     }
-
-    @Test
-    public void testCreatePartitions() throws ExecutionException, InterruptedException {
-        Map<String, NewPartitions> newPartitionsMap = Map.of("ddd", NewPartitions.increaseTo(1));
-        adminClient.createPartitions(newPartitionsMap).all().get();
-    }
 }

@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class MessageService {
         try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
 
             TopicPartition topicPartition = new TopicPartition(topicName, tPartition);
-            List<TopicPartition> topicPartitions = List.of(topicPartition);
+            List<TopicPartition> topicPartitions = Collections.singletonList(topicPartition);
             kafkaConsumer.assign(topicPartitions);
 
             Long beginningOffset = kafkaConsumer.beginningOffsets(topicPartitions).get(topicPartition);
@@ -39,11 +40,11 @@ public class MessageService {
             Long endOffset = kafkaConsumer.endOffsets(topicPartitions).get(topicPartition);
             long currentOffset = startOffset - 1;
 
-            final var records = new ArrayList<ConsumerRecord<String, String>>(count);
+            List<ConsumerRecord<String, String>> records = new ArrayList<>(count);
 
-            var emptyPoll = 0;
+            int emptyPoll = 0;
             while (records.size() < count && currentOffset < endOffset) {
-                var polled = kafkaConsumer.poll(Duration.ofMillis(200)).records(topicPartition);
+                List<ConsumerRecord<String, String>> polled = kafkaConsumer.poll(Duration.ofMillis(200)).records(topicPartition);
 
                 if (!CollectionUtils.isEmpty(polled)) {
                     records.addAll(polled);

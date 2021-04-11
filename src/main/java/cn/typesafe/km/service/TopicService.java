@@ -94,7 +94,7 @@ public class TopicService {
     public TopicInfo info(String clusterId, String topicName) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
         try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
-            TopicDescription topicDescription = adminClient.describeTopics(List.of(topicName)).all().get().get(topicName);
+            TopicDescription topicDescription = adminClient.describeTopics(Collections.singletonList(topicName)).all().get().get(topicName);
             TopicInfo topicInfo = new TopicInfo();
             topicInfo.setClusterId(clusterId);
             topicInfo.setName(topicName);
@@ -241,7 +241,9 @@ public class TopicService {
 
     public void createPartitions(String clusterId, String topic, int totalCount) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
-        Map<String, NewPartitions> newPartitionsMap = Map.of(topic, NewPartitions.increaseTo(totalCount));
+        Map<String, NewPartitions> newPartitionsMap = new HashMap<>();
+        newPartitionsMap.put(topic, NewPartitions.increaseTo(totalCount));
+        
         adminClient.createPartitions(newPartitionsMap).all().get();
     }
 
