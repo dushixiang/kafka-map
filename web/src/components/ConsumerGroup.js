@@ -185,8 +185,8 @@ class ConsumerGroup extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        title={'消费组管理'}
-                        subTitle={this.state.clusterName}
+                        subTitle={'消费组管理'}
+                        title={this.state.clusterName}
                     />
                 </div>
 
@@ -200,7 +200,7 @@ class ConsumerGroup extends Component {
                                 <Space>
                                     <Search
                                         ref={this.inputRefOfName}
-                                        placeholder="GroupID"
+                                        placeholder="group id"
                                         allowClear
                                         onSearch={this.handleSearchByName}
                                     />

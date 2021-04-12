@@ -14,8 +14,10 @@ class Broker extends Component {
     componentDidMount() {
         let urlParams = new URLSearchParams(this.props.location.search);
         let clusterId = urlParams.get('clusterId');
+        let clusterName = urlParams.get('clusterName');
         this.setState({
             clusterId: clusterId,
+            clusterName: clusterName
         })
         this.loadItems(clusterId);
     }
@@ -74,8 +76,8 @@ class Broker extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        title={'Broker 管理'}
-                        subTitle={this.state.clusterName}
+                        title={this.state.clusterName}
+                        subTitle={'Broker 管理'}
                     />
                 </div>
 

@@ -83,8 +83,8 @@ class TopicData extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
+                        subTitle={'数据拉取'}
                         title={this.state.topic}
-                        subTitle="拉取数据"
                     >
                         <Row>
                             <Space size='large'>
@@ -135,8 +135,15 @@ class TopicData extends Component {
                             name={'offset'}
                             label={'Offset'}
                         >
-                            <InputNumber min={0}
-                                         style={{width: 120}}/>
+                            {
+                                this.state.topicInfo ?
+                                    <InputNumber min={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
+                                                 max={this.state.topicInfo['partitions'][this.state.partition]['endOffset']}
+                                                 defaultValue={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
+                                                 style={{width: 120}}/>
+                                    : undefined
+                            }
+
                         </Form.Item>
                         <Form.Item
                             name={'count'}
