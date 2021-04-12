@@ -72,3 +72,16 @@ systemctl status kafka-map
 ### 使用
 
 接下来使用浏览器打开服务器的 `8080` 端口即可访问。
+
+## FAQ
+
+<details>
+    <summary>不想使用8080端口怎么办？</summary>
+
+在启动命令上增加 `--server.port=1234` 即可修改端口为 `1234`。
+
+```shell
+# 示例
+java -jar kafka-map.jar --server.port=1234
+```
+</details>
