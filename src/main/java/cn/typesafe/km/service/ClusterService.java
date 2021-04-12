@@ -4,6 +4,7 @@ import cn.typesafe.km.config.Constant;
 import cn.typesafe.km.entity.Cluster;
 import cn.typesafe.km.repository.ClusterRepository;
 import cn.typesafe.km.util.ID;
+import cn.typesafe.km.util.Networks;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -43,6 +44,7 @@ public class ClusterService {
         Properties properties = new Properties();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
+        properties.put(AdminClientConfig.RETRIES_CONFIG, "0");
         return AdminClient.create(properties);
     }
 
@@ -88,6 +90,19 @@ public class ClusterService {
     @Transactional(rollbackFor = Exception.class)
     public void create(Cluster cluster) throws ExecutionException, InterruptedException {
         String uuid = ID.uuid();
+        for (String server : cluster.getServers().split(",")) {
+            String[] split = server.split(":");
+            String host = split[0];
+            boolean hostReachable = Networks.isHostReachable(host);
+            if (!hostReachable) {
+                throw new IllegalArgumentException("Host " + host + " is not reachable.");
+            }
+            int port = Integer.parseInt(split[1]);
+            boolean hostConnected = Networks.isHostConnected(host, port);
+            if (!hostConnected) {
+                throw new IllegalArgumentException("server " + server + " can't connected.");
+            }
+        }
 
         AdminClient adminClient = getAdminClient(uuid, cluster.getServers());
         String clusterId = adminClient.describeCluster().clusterId().get();

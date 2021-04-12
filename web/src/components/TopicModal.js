@@ -1,6 +1,7 @@
 import React from 'react';
 import {Form, Input, Modal, InputNumber} from "antd/lib/index";
-const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model}) => {
+
+const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model, brokerCount}) => {
 
     const [form] = Form.useForm();
 
@@ -10,7 +11,10 @@ const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model}) => {
     };
 
     if (model === null || model === undefined) {
-        model = {}
+        model = {
+            'numPartitions': 1,
+            'replicationFactor': 1
+        }
     }
 
     return (
@@ -23,8 +27,10 @@ const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model}) => {
                 form
                     .validateFields()
                     .then(values => {
-                        form.resetFields();
-                        handleOk(values);
+                        let success = handleOk(values);
+                        if (success === true) {
+                            form.resetFields();
+                        }
                     })
                     .catch(info => {
 
@@ -50,7 +56,8 @@ const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model}) => {
                 </Form.Item>
 
                 <Form.Item label="副本数量" name='replicationFactor' rules={[{required: true}]}>
-                    <InputNumber min={1} style={{width: '100%'}} placeholder={'副本数量不能大于集群broker数量'}/>
+                    <InputNumber min={1} max={brokerCount} style={{width: '100%'}}
+                                 placeholder={'副本数量不能大于集群broker数量: ' + brokerCount}/>
                 </Form.Item>
 
             </Form>

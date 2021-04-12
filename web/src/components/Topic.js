@@ -51,6 +51,7 @@ class Topic extends Component {
         modalVisible: false,
         clusterId: undefined,
         clusterName: undefined,
+        brokerCount: 1,
         selectedRow: {},
         createPartitionConfirmLoading: false
     }
@@ -59,9 +60,11 @@ class Topic extends Component {
         let urlParams = new URLSearchParams(this.props.location.search);
         let clusterId = urlParams.get('clusterId');
         let clusterName = urlParams.get('clusterName');
+        let brokerCount = urlParams.get('brokerCount');
         this.setState({
             clusterId: clusterId,
-            clusterName: clusterName
+            clusterName: clusterName,
+            brokerCount: brokerCount
         })
         let query = {
             ...this.state.queryParams,
@@ -128,6 +131,7 @@ class Topic extends Component {
                     modalVisible: false
                 });
                 await this.loadTableData(this.state.queryParams);
+                return true;
             }
         } finally {
             this.setState({
@@ -282,8 +286,8 @@ class Topic extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        title={'主题管理'}
-                        subTitle={this.state.clusterName}
+                        subTitle={'主题管理'}
+                        title={this.state.clusterName}
                     />
                 </div>
 
@@ -384,6 +388,7 @@ class Topic extends Component {
                                 handleCancel={this.handleCancelModal}
                                 confirmLoading={this.state.modalConfirmLoading}
                                 model={this.state.model}
+                                brokerCount={this.state.brokerCount}
                             /> : undefined
                     }
 
@@ -417,9 +422,9 @@ class Topic extends Component {
                                })
                            }}>
                         <Form ref={this.form} {...formItemLayout}>
-                            <Form.Item label="总分区数量" name='totalCount' rules={[{required: true}]}>
-                                <InputNumber min={this.state.selectedRow['partitionsSize']}
-                                             placeholder={'不能小于当前分区数量：' + this.state.selectedRow["partitionsSize"]}
+                            <Form.Item label="分区数量" name='totalCount' rules={[{required: true}]}>
+                                <InputNumber min={this.state.selectedRow['partitionsCount']}
+                                             placeholder={'不能小于当前分区数量：' + this.state.selectedRow["partitionsCount"]}
                                              style={{width: '100%'}}/>
                             </Form.Item>
                         </Form>

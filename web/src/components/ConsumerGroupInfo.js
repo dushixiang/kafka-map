@@ -46,7 +46,7 @@ class ConsumerGroupInfo extends Component {
                             this.props.history.goBack();
                         }}
                         title={this.state.groupId}
-                        subTitle="详细信息"
+                        subTitle="消费组详情"
                     >
                         <Row>
                             <Space size='large'>

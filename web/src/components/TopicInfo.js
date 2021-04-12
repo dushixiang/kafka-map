@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, PageHeader, Statistic, Tabs, Row, Space} from "antd";
+import {Button, PageHeader, Statistic, Tabs, Row, Space, message} from "antd";
 import TopicPartition from "./TopicPartition";
 import TopicBroker from "./TopicBroker";
 import TopicConsumerGroup from "./TopicConsumerGroup";
@@ -52,10 +52,12 @@ class TopicInfo extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
+                        subTitle={'主题详情'}
                         title={this.state.topic}
-                        subTitle="详细信息"
                         extra={[
-                            <Button key="2">导入数据</Button>,
+                            <Button key="2" onClick={() => {
+                                message.warn('功能尚未实现，敬请期待。');
+                            }}>导入数据</Button>,
                             <Link to={`/topic-data?clusterId=${this.state.clusterId}&topic=${this.state.topic}`}>
                                 <Button key="1" type="primary">
                                     拉取数据

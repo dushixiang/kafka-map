@@ -19,7 +19,7 @@ const handleError = (error) => {
     }
     if (error.response !== undefined) {
         let data = error.response.data;
-        message.error(`status: ${data.status}, error: ${data.error}, message: ${data.message}`, 10);
+        message.error(`${data.message}`, 10);
         return false;
     }
     return true;

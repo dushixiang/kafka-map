@@ -67,7 +67,7 @@ class TopicPartition extends Component {
                 return renderSize(totalLogSize)
             }
         }, {
-            title: 'Replicas',
+            title: '副本',
             dataIndex: 'replicas',
             key: 'replicas',
             render: (replicas, record, index) => {
@@ -84,7 +84,7 @@ class TopicPartition extends Component {
                 </Space>;
             }
         }, {
-            title: 'ISR',
+            title: '（已同步副本）ISR',
             dataIndex: 'isr',
             key: 'isr',
             render: (isr, record, index) => {

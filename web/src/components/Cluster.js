@@ -136,6 +136,7 @@ class Cluster extends Component {
                     modalVisible: false
                 });
                 await this.loadTableData(this.state.queryParams);
+                return true;
             }
         } finally {
             this.setState({
@@ -200,7 +201,7 @@ class Cluster extends Component {
             dataIndex: 'topicCount',
             key: 'topicCount',
             render: (topicCount, record, index) => {
-                return <Link to={`/topic?clusterId=${record['id']}&clusterName=${record['name']}`}>
+                return <Link to={`/topic?clusterId=${record['id']}&clusterName=${record['name']}&brokerCount=${record['brokerCount']}`}>
                     {topicCount}
                 </Link>
             }

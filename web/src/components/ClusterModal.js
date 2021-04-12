@@ -26,8 +26,10 @@ const ClusterModal = ({title, handleOk, handleCancel, confirmLoading, model}) =>
                 form
                     .validateFields()
                     .then(values => {
-                        form.resetFields();
-                        handleOk(values);
+                        let success = handleOk(values);
+                        if(success === true){
+                            form.resetFields();
+                        }
                     })
                     .catch(info => {
 
