@@ -36,3 +36,4 @@ dashboard/.idea
 dashboard/*.iml
 dashboard/node_modules
 
+/data/kafka-map.db

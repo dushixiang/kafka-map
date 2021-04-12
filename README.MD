@@ -33,11 +33,21 @@
 
 ## 快速安装
 
-下载安装包并解压到你喜欢的目录
+下载
+```shell
+wget https://github.com/dushixiang/kafka-map/releases/latest/download/kafka-map.tgz
+```
+
+解压
+```shell
+tar -zxvf kafka-map.tgz -C /usr/local/
+```
 
 ### 前台运行
-进入kafka-map文件夹执行
 ```shell
+# kafka-map文件夹
+cd /usr/local/kafka-map
+# 启动
 java -jar kafka-map.jar 
 ```
 
