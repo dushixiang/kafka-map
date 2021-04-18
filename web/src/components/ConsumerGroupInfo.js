@@ -1,16 +1,30 @@
 import React, {Component} from 'react';
-import {PageHeader, Tabs, Row, Space} from "antd";
+import {
+    PageHeader,
+    Row,
+    Space,
+    Col,
+    Button,
+    Table,
+    Typography, Tooltip
+} from "antd";
 import request from "../common/request";
-import TopicConsumerGroupOffset from "./TopicConsumerGroupOffset";
+import {Link} from "react-router-dom";
+import qs from "qs";
 
-const {TabPane} = Tabs;
+const {Title} = Typography;
 
 class ConsumerGroupInfo extends Component {
 
     state = {
         clusterId: undefined,
         groupId: undefined,
-        item: undefined
+        items: [],
+        queryParams: {
+            pageIndex: 1,
+            pageSize: 10
+        },
+        loading: false
     }
 
     componentDidMount() {
@@ -21,21 +35,103 @@ class ConsumerGroupInfo extends Component {
             clusterId: clusterId,
             groupId: groupId,
         })
-        this.loadTopicInfo(clusterId, groupId);
+        let query = {
+            ...this.state.queryParams,
+            'clusterId': clusterId,
+            'groupId': groupId
+        }
+        this.loadTableData(query);
     }
 
     handleTabChange(key) {
 
     }
 
-    loadTopicInfo = async (clusterId, groupId) => {
-        let result = await request.get(`/consumerGroups/${groupId}?clusterId=${clusterId}`);
+    async loadTableData(queryParams) {
         this.setState({
-            item: result
-        })
+            loading: true
+        });
+
+        queryParams = queryParams || this.state.queryParams;
+
+        // queryParams
+        let paramsStr = qs.stringify(queryParams);
+        let items = [];
+        try {
+            items = await request.get(`/consumerGroups/${queryParams['groupId']}/describe?` + paramsStr);
+        } catch (e) {
+            console.log(e);
+        } finally {
+            items = items.map(item => {
+                return {'key': item['id'], ...item}
+            })
+            this.setState({
+                items: items,
+                queryParams: queryParams,
+                loading: false
+            });
+        }
     }
 
     render() {
+
+        const columns = [{
+                title: 'TOPIC',
+                dataIndex: 'topic',
+                key: 'topic',
+                defaultSortOrder: 'ascend',
+                sorter: (a, b) => a.groupId.localeCompare(b.groupId),
+                render: (topic, record, index) => {
+                    return <Link to={`/topic-info?clusterId=${this.state.clusterId}&topic=${topic}`}>
+                        {topic}
+                    </Link>
+                }
+            }, {
+                title: 'PARTITION',
+                dataIndex: 'partition',
+                key: 'partition',
+                sorter: (a, b) => a['partition'] - b['partition'],
+            }, {
+                title: 'END-OFFSET',
+                dataIndex: 'logEndOffset',
+                key: 'logEndOffset',
+                sorter: (a, b) => a['logEndOffset'] - b['logEndOffset'],
+            }, {
+                title: 'CURRENT-OFFSET',
+                dataIndex: 'currentOffset',
+                key: 'currentOffset',
+                sorter: (a, b) => a['currentOffset'] - b['currentOffset'],
+            }, {
+                title: 'Lag',
+                dataIndex: 'lag',
+                key: 'lag',
+                sorter: (a, b) => a['lag'] - b['lag'],
+            }, {
+                title: 'CONSUMER-ID',
+                dataIndex: 'consumerId',
+                key: 'consumerId',
+                render: (consumerId) => {
+                    let short = consumerId;
+                    if (short && short.length > 10) {
+                        short = short.substring(0, 10) + " ...";
+                    }
+                    return (
+                        <Tooltip placement="topLeft" title={consumerId}>
+                            {short}
+                        </Tooltip>
+                    );
+                }
+            }, {
+                title: 'HOST',
+                dataIndex: 'host',
+                key: 'host',
+            }, {
+                title: 'CLIENT-ID',
+                dataIndex: 'clientId',
+                key: 'clientId',
+            }
+            ]
+        ;
 
         return (
             <div>
@@ -57,21 +153,32 @@ class ConsumerGroupInfo extends Component {
                 </div>
 
                 <div className='kd-content'>
-                    <Tabs defaultActiveKey='0' onChange={this.handleTabChange}>
-                        {
-                            this.state.item ?
-                                this.state.item['topics'].map(topic => {
-                                    return <TabPane tab={topic} key={topic}>
-                                        <TopicConsumerGroupOffset
-                                            clusterId={this.state.clusterId}
-                                            topic={topic}
-                                            groupId={this.state.groupId}
-                                        />
-                                    </TabPane>
-                                })
-                                : undefined
-                        }
-                    </Tabs>
+                    <div style={{marginBottom: 20}}>
+                        <Row justify="space-around" align="middle" gutter={24}>
+                            <Col span={8} key={1}>
+                                <Title level={3}>订阅主题</Title>
+                            </Col>
+                            <Col span={16} key={2} style={{textAlign: 'right'}}>
+                                <Space>
+
+                                </Space>
+                            </Col>
+                        </Row>
+                    </div>
+
+                    <Table
+                        rowKey='id'
+                        dataSource={this.state.items}
+                        columns={columns}
+                        position={'both'}
+                        size={'middle'}
+                        loading={this.state.loading}
+                        pagination={{
+                            showSizeChanger: true,
+                            total: this.state.items.length,
+                            showTotal: total => `总计 ${total} 条`
+                        }}
+                    />
                 </div>
             </div>
         );

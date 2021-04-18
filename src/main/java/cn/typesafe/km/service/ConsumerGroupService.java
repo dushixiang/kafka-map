@@ -1,10 +1,7 @@
 package cn.typesafe.km.service;
 
 import cn.typesafe.km.entity.Cluster;
-import cn.typesafe.km.service.dto.ConsumerGroup;
-import cn.typesafe.km.service.dto.ConsumerGroupInfo;
-import cn.typesafe.km.service.dto.ResetOffset;
-import cn.typesafe.km.service.dto.TopicOffset;
+import cn.typesafe.km.service.dto.*;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.admin.ConsumerGroupListing;
@@ -45,10 +42,12 @@ public class ConsumerGroupService {
      */
     public List<ConsumerGroup> consumerGroups(String topicName, String clusterId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
-        List<String> groupIds = adminClient.listConsumerGroups().all().get().stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList());
+        Collection<ConsumerGroupListing> consumerGroupListings = adminClient.listConsumerGroups().all().get();
+        List<String> groupIds = consumerGroupListings.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList());
         Map<String, ConsumerGroupDescription> groups = adminClient.describeConsumerGroups(groupIds).all().get();
         List<ConsumerGroup> consumerGroups = new ArrayList<>();
-        for (String groupId : groupIds) {
+        for (ConsumerGroupListing consumerGroupListing : consumerGroupListings) {
+            String groupId = consumerGroupListing.groupId();
             ConsumerGroupDescription consumerGroupDescription = groups.get(groupId);
             consumerGroupDescription.members()
                     .stream()
@@ -186,5 +185,52 @@ public class ConsumerGroupService {
     public void delete(String clusterId, String groupId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
         adminClient.deleteConsumerGroups(Collections.singletonList(groupId)).all().get();
+    }
+
+    public List<ConsumerGroupDescribe> describe(String clusterId, String groupId) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+        ConsumerGroupDescription consumerGroupDescription = adminClient.describeConsumerGroups(Collections.singletonList(groupId)).all().get().get(groupId);
+
+        Map<TopicPartition, OffsetAndMetadata> topicPartitionOffsetAndMetadataMap = adminClient.listConsumerGroupOffsets(groupId)
+                .partitionsToOffsetAndMetadata()
+                .get();
+        Set<TopicPartition> topicPartitions = topicPartitionOffsetAndMetadataMap.keySet();
+        try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
+            Map<TopicPartition, Long> endOffsets = kafkaConsumer.endOffsets(topicPartitions);
+            Map<TopicPartition, Long> beginningOffsets = kafkaConsumer.beginningOffsets(topicPartitions);
+
+            return consumerGroupDescription.members()
+                    .stream()
+                    .flatMap(consumer -> {
+                        return consumer.assignment().topicPartitions()
+                                .stream()
+                                .map(topicPartition -> {
+                                    String topic = topicPartition.topic();
+                                    int partition = topicPartition.partition();
+                                    String consumerId = consumer.consumerId();
+                                    String host = consumer.host();
+                                    String clientId = consumer.clientId();
+                                    OffsetAndMetadata offsetAndMetadata = topicPartitionOffsetAndMetadataMap.get(topicPartition);
+                                    Long beginningOffset = beginningOffsets.get(topicPartition);
+                                    Long endOffset = endOffsets.get(topicPartition);
+                                    long offset = offsetAndMetadata.offset();
+
+                                    ConsumerGroupDescribe consumerGroupDescribe = new ConsumerGroupDescribe();
+                                    consumerGroupDescribe.setGroupId(groupId);
+                                    consumerGroupDescribe.setTopic(topic);
+                                    consumerGroupDescribe.setPartition(partition);
+                                    consumerGroupDescribe.setCurrentOffset(offset);
+                                    consumerGroupDescribe.setLogBeginningOffset(beginningOffset);
+                                    consumerGroupDescribe.setLogEndOffset(endOffset);
+                                    consumerGroupDescribe.setLag(endOffset - offset);
+                                    consumerGroupDescribe.setConsumerId(consumerId);
+                                    consumerGroupDescribe.setHost(host);
+                                    consumerGroupDescribe.setClientId(clientId);
+
+                                    return consumerGroupDescribe;
+                                });
+                    })
+                    .collect(Collectors.toList());
+        }
     }
 }
