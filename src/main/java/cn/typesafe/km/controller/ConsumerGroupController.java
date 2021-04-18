@@ -2,6 +2,7 @@ package cn.typesafe.km.controller;
 
 import cn.typesafe.km.service.ConsumerGroupService;
 import cn.typesafe.km.service.dto.ConsumerGroup;
+import cn.typesafe.km.service.dto.ConsumerGroupDescribe;
 import cn.typesafe.km.service.dto.ConsumerGroupInfo;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,11 @@ public class ConsumerGroupController {
     @GetMapping("/{groupId}")
     public ConsumerGroupInfo info(@PathVariable String groupId, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
         return consumerGroupService.info(clusterId, groupId);
+    }
+
+    @GetMapping("/{groupId}/describe")
+    public List<ConsumerGroupDescribe> describe(@PathVariable String groupId, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
+        return consumerGroupService.describe(clusterId, groupId);
     }
 
     @GetMapping("")
