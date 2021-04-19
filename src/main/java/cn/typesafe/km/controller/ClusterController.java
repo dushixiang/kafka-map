@@ -41,10 +41,13 @@ public class ClusterController {
 
         Example<Cluster> example = Example.of(query, exampleMatcher);
         Page<Cluster> page = clusterRepository.findAll(example, pageRequest);
-        List<Cluster> clusters = page.getContent();
-        clusterService.setProperties(clusters);
 
         return PageResult.of(page.getTotalElements(), page.getContent());
+    }
+
+    @GetMapping("/{clusterId}")
+    public Cluster detail(@PathVariable String clusterId) throws ExecutionException, InterruptedException {
+        return clusterService.detail(clusterId);
     }
 
     @GetMapping("")

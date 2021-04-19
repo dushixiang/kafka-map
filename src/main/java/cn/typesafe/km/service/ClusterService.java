@@ -123,19 +123,19 @@ public class ClusterService {
         }
     }
 
-    public void setProperties(List<Cluster> clusters) throws ExecutionException, InterruptedException {
-        for (Cluster cluster : clusters) {
-            Set<String> topicNames = topicService.topicNames(cluster.getId());
-            cluster.setTopicCount(topicNames.size());
-            cluster.setBrokerCount(brokerService.countBroker(cluster.getId()));
-            cluster.setConsumerCount(consumerGroupService.countConsumerGroup(cluster.getId()));
-        }
-    }
-
     @Transactional(rollbackFor = Exception.class)
     public void updateNameById(String clusterId, String name) {
         Cluster cluster = findById(clusterId);
         cluster.setName(name);
         clusterRepository.saveAndFlush(cluster);
+    }
+
+    public Cluster detail(String clusterId) throws ExecutionException, InterruptedException {
+        Cluster cluster = findById(clusterId);
+        Set<String> topicNames = topicService.topicNames(cluster.getId());
+        cluster.setTopicCount(topicNames.size());
+        cluster.setBrokerCount(brokerService.countBroker(cluster.getId()));
+        cluster.setConsumerCount(consumerGroupService.countConsumerGroup(cluster.getId()));
+        return cluster;
     }
 }

@@ -72,6 +72,39 @@ class Cluster extends Component {
                 queryParams: queryParams,
                 loading: false
             });
+
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+                this.loadClusterDetail(item['id']);
+            }
+        }
+    }
+
+    loadClusterDetail = async (clusterId) => {
+        let cluster;
+        try {
+            cluster = await request.get('/clusters/' + clusterId);
+        } catch (e) {
+            // message.error(e);
+            console.log(e);
+            cluster = {
+                topicCount: 0,
+                brokerCount: 0,
+                consumerCount: 0
+            }
+        } finally {
+            let items = this.state.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i]['id'] === clusterId) {
+                    items[i]['topicCount'] = cluster['topicCount'];
+                    items[i]['brokerCount'] = cluster['brokerCount'];
+                    items[i]['consumerCount'] = cluster['consumerCount'];
+                    break;
+                }
+            }
+            this.setState({
+                items: items
+            })
         }
     }
 
@@ -201,7 +234,8 @@ class Cluster extends Component {
             dataIndex: 'topicCount',
             key: 'topicCount',
             render: (topicCount, record, index) => {
-                return <Link to={`/topic?clusterId=${record['id']}&clusterName=${record['name']}&brokerCount=${record['brokerCount']}`}>
+                return <Link
+                    to={`/topic?clusterId=${record['id']}&clusterName=${record['name']}&brokerCount=${record['brokerCount']}`}>
                     {topicCount}
                 </Link>
             }
