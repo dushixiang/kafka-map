@@ -9,7 +9,11 @@
 
 ### 消费组
 
-![主题管理](../screenshot/consumer.png)
+![消费组](../screenshot/consumer.png)
+
+### 消费组详情
+
+![消费组详情](../screenshot/consumer-detail.png)
 
 ### topic详情——分区
 
