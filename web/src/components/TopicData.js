@@ -20,6 +20,7 @@ import {
     RightCircleTwoTone,
     DownCircleTwoTone
 } from '@ant-design/icons';
+import {Input} from "antd/lib/index";
 
 const {Text} = Typography;
 
@@ -107,67 +108,94 @@ class TopicData extends Component {
                 </div>
 
                 <div className='kd-page-header' style={{padding: 20}}>
-                    <Form ref={this.form} layout="inline" onFinish={this.pullMessage}
+                    <Form ref={this.form} onFinish={this.pullMessage}
                           initialValues={{
                               offset: 0,
                               count: 10,
                               partition: 0
                           }}>
-                        <Form.Item
-                            name={'partition'}
-                            label={'Partition'}
-                        >
-                            <Select style={{width: 120}} onChange={(value) => {
-                                this.setState({
-                                    partition: value
-                                })
-                            }}>
-                                {
-                                    this.state.topicInfo ?
-                                        this.state.topicInfo['partitions'].map(item => {
-                                            return <Select.Option
-                                                value={item['partition']}>{item['partition']}</Select.Option>
-                                        }) : undefined
-                                }
-                            </Select>
-                        </Form.Item>
-                        <Form.Item
-                            name={'offset'}
-                            label={'Offset'}
-                        >
-                            {
-                                this.state.topicInfo ?
-                                    <InputNumber min={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
-                                                 max={this.state.topicInfo['partitions'][this.state.partition]['endOffset']}
-                                                 defaultValue={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
-                                                 style={{width: 120}}/>
-                                    : undefined
-                            }
+                        <Row>
+                            <Col span={4}>
+                                <Form.Item
+                                    name={'partition'}
+                                    label={'Partition'}
+                                >
+                                    <Select style={{width: 100}} onChange={(value) => {
+                                        this.setState({
+                                            partition: value
+                                        })
+                                    }}>
+                                        {
+                                            this.state.topicInfo ?
+                                                this.state.topicInfo['partitions'].map(item => {
+                                                    return <Select.Option
+                                                        value={item['partition']}>{item['partition']}</Select.Option>
+                                                }) : undefined
+                                        }
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={4}>
+                                <Form.Item
+                                    name={'offset'}
+                                    label={'Offset'}
+                                >
+                                    {
+                                        this.state.topicInfo ?
+                                            <InputNumber min={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
+                                                         max={this.state.topicInfo['partitions'][this.state.partition]['endOffset']}
+                                                         defaultValue={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
+                                                         style={{width: 120}}/>
+                                            : undefined
+                                    }
 
-                        </Form.Item>
-                        <Form.Item
-                            name={'count'}
-                            label={'消息数量'}
-                        >
-                            <InputNumber min={1}
-                                         style={{width: 120}}/>
-                        </Form.Item>
+                                </Form.Item>
+                            </Col>
+                            <Col span={4}>
+                                <Form.Item
+                                    name={'count'}
+                                    label={'消息数量'}
+                                >
+                                    <InputNumber min={1} style={{width: 100}}/>
+                                </Form.Item>
+                            </Col>
 
-                        <Form.Item shouldUpdate>
-                            <Button type="primary" htmlType="submit" loading={this.state.loading}>
-                                拉取
-                            </Button>
-                        </Form.Item>
+                            <Col span={6} key='keyFilter' style={{paddingRight: 8}}>
+                                <Form.Item
+                                    name={'keyFilter'}
+                                    label={'key'}
+                                >
+                                    <Input allowClear placeholder="filter key"/>
+                                </Form.Item>
 
-                        <Form.Item shouldUpdate>
-                            <Button type="default" danger onClick={() => {
-                                this.setState({
-                                    items: []
-                                })
-                            }}>
-                                清空
-                            </Button>
-                        </Form.Item>
+                            </Col>
+
+                            <Col span={6} key='valueFilter'>
+                                <Form.Item
+                                    name={'valueFilter'}
+                                    label={'value'}
+                                >
+                                    <Input allowClear placeholder="filter value"/>
+                                </Form.Item>
+                            </Col>
+                        </Row>
+
+                        <Row>
+                            <Col span={24} style={{ textAlign: 'right' }}>
+                                <Button type="primary" htmlType="submit" loading={this.state.loading} style={{ margin: '0 8px' }}>
+                                    拉取
+                                </Button>
+
+                                <Button type="default" danger onClick={() => {
+                                    this.setState({
+                                        items: []
+                                    })
+                                }}>
+                                    清空
+                                </Button>
+                            </Col>
+                        </Row>
+
                     </Form>
                 </div>
 

@@ -169,14 +169,6 @@ class ConsumerGroup extends Component {
             ]
         ;
 
-        const selectedRowKeys = this.state.selectedRowKeys;
-        const rowSelection = {
-            selectedRowKeys: this.state.selectedRowKeys,
-            onChange: (selectedRowKeys, selectedRows) => {
-                this.setState({selectedRowKeys});
-            },
-        };
-
         return (
             <div>
                 <div className='kd-page-header'>
@@ -234,7 +226,6 @@ class ConsumerGroup extends Component {
                     </div>
 
                     <Table
-                        rowSelection={rowSelection}
                         rowKey='id'
                         dataSource={this.state.items}
                         columns={columns}

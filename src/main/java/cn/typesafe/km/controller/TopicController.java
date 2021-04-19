@@ -89,7 +89,9 @@ public class TopicController {
     public List<ConsumerMessage> data(@PathVariable String topic, @RequestParam String clusterId,
                                       @RequestParam(defaultValue = "0") Integer partition,
                                       @RequestParam(defaultValue = "0") Long offset,
-                                      @RequestParam(defaultValue = "100") Integer count) {
-        return messageService.data(clusterId, topic, partition, offset, count);
+                                      @RequestParam(defaultValue = "100") Integer count,
+                                      String keyFilter,
+                                      String valueFilter) {
+        return messageService.data(clusterId, topic, partition, offset, count, keyFilter, valueFilter);
     }
 }

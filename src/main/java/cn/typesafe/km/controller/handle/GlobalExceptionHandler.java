@@ -1,5 +1,6 @@
 package cn.typesafe.km.controller.handle;
 
+import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -30,6 +31,16 @@ public class GlobalExceptionHandler {
         String message = e.getMessage();
         Map<String, Object> data = new HashMap<>();
         data.put("message", message);
+        return data;
+    }
+
+    @ResponseStatus(value = HttpStatus.GATEWAY_TIMEOUT)
+    @ResponseBody
+    @ExceptionHandler(value = TimeoutException.class)
+    public Map<String, Object> timeoutException(TimeoutException e) {
+        String message = e.getMessage();
+        Map<String, Object> data = new HashMap<>();
+        data.put("message", "访问kafka broker节点超时");
         return data;
     }
 }

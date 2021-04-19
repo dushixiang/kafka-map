@@ -25,7 +25,10 @@ public class TopicService {
 
     public Set<String> topicNames(String clusterId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
-        ListTopicsResult topics = adminClient.listTopics();
+        ListTopicsOptions listTopicsOptions = new ListTopicsOptions();
+        listTopicsOptions.timeoutMs(5000);
+        listTopicsOptions.listInternal(false);
+        ListTopicsResult topics = adminClient.listTopics(listTopicsOptions);
         return topics.names().get();
     }
 

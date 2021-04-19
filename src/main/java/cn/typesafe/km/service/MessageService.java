@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.time.Duration;
@@ -24,7 +25,7 @@ public class MessageService {
     @Resource
     private ClusterService clusterService;
 
-    public List<ConsumerMessage> data(String clusterId, String topicName, Integer tPartition, Long startOffset, int count) {
+    public List<ConsumerMessage> data(String clusterId, String topicName, Integer tPartition, Long startOffset, int count, String keyFilter, String valueFilter) {
         try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
 
             TopicPartition topicPartition = new TopicPartition(topicName, tPartition);
@@ -47,7 +48,25 @@ public class MessageService {
                 List<ConsumerRecord<String, String>> polled = kafkaConsumer.poll(Duration.ofMillis(200)).records(topicPartition);
 
                 if (!CollectionUtils.isEmpty(polled)) {
-                    records.addAll(polled);
+
+                    for (ConsumerRecord<String, String> consumerRecord : polled) {
+                        if(StringUtils.hasText(keyFilter)){
+                            String key = consumerRecord.key();
+                            if(StringUtils.hasText(key) && key.toLowerCase().contains(keyFilter.toLowerCase())) {
+                                records.add(consumerRecord);
+                            }
+                            continue;
+                        }
+
+                        if(StringUtils.hasText(valueFilter)){
+                            String value = consumerRecord.value();
+                            if(StringUtils.hasText(value) && value.toLowerCase().contains(valueFilter.toLowerCase())) {
+                                records.add(consumerRecord);
+                            }
+                            continue;
+                        }
+                        records.add(consumerRecord);
+                    }
                     currentOffset = polled.get(polled.size() - 1).offset();
                     emptyPoll = 0;
                 } else if (++emptyPoll == 3) {
