@@ -6,6 +6,7 @@ import TopicConsumerGroup from "./TopicConsumerGroup";
 import {Link} from "react-router-dom";
 import request from "../common/request";
 import {renderSize} from "../utils/utils";
+import TopicConfig from "./TopicConfig";
 
 const {TabPane} = Tabs;
 
@@ -96,6 +97,13 @@ class TopicInfo extends Component {
                                 topic={this.state.topic}>
 
                             </TopicConsumerGroup>
+                        </TabPane>
+                        <TabPane tab="配置" key="topic-config">
+                            <TopicConfig
+                                clusterId={this.state.clusterId}
+                                topic={this.state.topic}>
+
+                            </TopicConfig>
                         </TabPane>
                     </Tabs>
                 </div>

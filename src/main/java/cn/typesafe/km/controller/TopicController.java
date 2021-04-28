@@ -94,4 +94,11 @@ public class TopicController {
                                       String valueFilter) {
         return messageService.data(clusterId, topic, partition, offset, count, keyFilter, valueFilter);
     }
+
+    @GetMapping("/{topic}/configs")
+    public List<TopicConfig> getConfigs(@PathVariable String topic, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
+        return topicService.getConfigs(topic, clusterId);
+    }
+
+
 }
