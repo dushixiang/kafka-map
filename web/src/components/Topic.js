@@ -16,8 +16,6 @@ import {
 import request from "../common/request";
 import qs from "qs";
 import {
-    DeleteOutlined,
-    ExclamationCircleOutlined,
     PlusOutlined,
     SyncOutlined,
     UndoOutlined
@@ -26,10 +24,8 @@ import {Link} from "react-router-dom";
 import TopicModal from "./TopicModal";
 import {renderSize} from "../utils/utils";
 import {FormattedMessage} from "react-intl";
-
-const confirm = Modal.confirm;
 const {Search} = Input;
-const {Title, Text} = Typography;
+const {Title} = Typography;
 
 const formItemLayout = {
     labelCol: {span: 6},
