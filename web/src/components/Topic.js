@@ -25,6 +25,7 @@ import {
 import {Link} from "react-router-dom";
 import TopicModal from "./TopicModal";
 import {renderSize} from "../utils/utils";
+import {FormattedMessage} from "react-intl";
 
 const confirm = Modal.confirm;
 const {Search} = Input;
@@ -42,7 +43,6 @@ class Topic extends Component {
 
     state = {
         items: [],
-        selectedRowKeys: [],
         queryParams: {
             pageIndex: 1,
             pageSize: 10
@@ -126,7 +126,7 @@ class Topic extends Component {
                 formData['clusterId'] = this.state.clusterId;
                 // 向后台提交数据
                 await request.post('/topics', formData);
-                message.success('操作成功', 3);
+                message.success('success', 3);
                 this.setState({
                     modalVisible: false
                 });
@@ -148,31 +148,9 @@ class Topic extends Component {
         })
         try {
             await request.post('/topics/batch-delete?clusterId=' + this.state.clusterId, [name]);
-            message.success('删除成功');
+            message.success('success');
         } finally {
             this.loadTableData(this.state.queryParams);
-        }
-    }
-
-    batchDelete = async () => {
-        this.setState({
-            delBtnLoading: true
-        })
-        try {
-            let result = await request.delete('/clusters/' + this.state.selectedRowKeys.join(','));
-            if (result.code === 1) {
-                message.success('操作成功', 3);
-                this.setState({
-                    selectedRowKeys: []
-                })
-                await this.loadTableData(this.state.queryParams);
-            } else {
-                message.error('删除失败 :( ' + result.message, 10);
-            }
-        } finally {
-            this.setState({
-                delBtnLoading: false
-            })
         }
     }
 
@@ -188,14 +166,14 @@ class Topic extends Component {
     render() {
 
         const columns = [{
-                title: '序号',
-                dataIndex: 'id',
-                key: 'id',
+                title: <FormattedMessage id="index" />,
+                dataIndex: 'index',
+                key: 'index',
                 render: (id, record, index) => {
                     return index + 1;
                 }
             }, {
-                title: 'Topic名称',
+                title: <FormattedMessage id="name" />,
                 dataIndex: 'name',
                 key: 'name',
                 defaultSortOrder: 'ascend',
@@ -207,17 +185,17 @@ class Topic extends Component {
                     </Link>
                 }
             }, {
-                title: '分区数量',
+                title: <FormattedMessage id="partitions" />,
                 dataIndex: 'partitionsCount',
                 key: 'partitionsCount',
                 sorter: (a, b) => a['partitionsCount'] - b['partitionsCount'],
             }, {
-                title: '副本数量',
+                title: <FormattedMessage id="replicas" />,
                 dataIndex: 'replicaCount',
                 key: 'replicaCount',
                 sorter: (a, b) => a['replicaCount'] - b['replicaCount'],
             }, {
-                title: '数据大小/副本',
+                title: <FormattedMessage id="average-log-size" />,
                 dataIndex: 'x',
                 key: 'x',
                 sorter: (a, b) => a['totalLogSize'] / a['replicaCount'] - b['totalLogSize'] / b['replicaCount'],
@@ -228,7 +206,7 @@ class Topic extends Component {
                     return renderSize(record['totalLogSize'] / record['replicaCount'])
                 }
             }, {
-                title: '数据大小',
+                title: <FormattedMessage id="log-size" />,
                 dataIndex: 'totalLogSize',
                 key: 'totalLogSize',
                 sorter: (a, b) => a['totalLogSize'] - b['totalLogSize'],
@@ -241,7 +219,7 @@ class Topic extends Component {
                 }
             },
                 {
-                    title: '操作',
+                    title: <FormattedMessage id="operate" />,
                     key: 'action',
                     render: (text, record, index) => {
                         return (
@@ -251,16 +229,15 @@ class Topic extends Component {
                                         createPartitionVisible: true,
                                         selectedRow: record
                                     })
-                                }}>分区扩容</Button>
+                                }}><FormattedMessage id="topic-alter" /></Button>
 
                                 <Popconfirm
-                                    title="您确认要删除此Topic吗?"
+                                    title={<FormattedMessage id="delete-confirm" />}
                                     onConfirm={() => this.delete(record['name'], index)}
                                 >
                                     <Button type="text" size='small' danger
-                                            loading={this.state.items[index]['deleting']}>删除</Button>
+                                            loading={this.state.items[index]['deleting']}><FormattedMessage id="delete" /></Button>
                                 </Popconfirm>
-
 
                             </div>
                         )
@@ -268,15 +245,6 @@ class Topic extends Component {
                 }
             ]
         ;
-
-        const selectedRowKeys = this.state.selectedRowKeys;
-        const rowSelection = {
-            selectedRowKeys: this.state.selectedRowKeys,
-            onChange: (selectedRowKeys, selectedRows) => {
-                this.setState({selectedRowKeys});
-            },
-        };
-        const hasSelected = selectedRowKeys.length > 0;
 
         return (
             <div>
@@ -286,7 +254,7 @@ class Topic extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        subTitle={'主题管理'}
+                        subTitle={<FormattedMessage id="topic-management" />}
                         title={this.state.clusterName}
                     />
                 </div>
@@ -301,11 +269,11 @@ class Topic extends Component {
                                 <Space>
                                     <Search
                                         ref={this.inputRefOfName}
-                                        placeholder="Topic名称"
+                                        placeholder="topic"
                                         allowClear
                                         onSearch={this.handleSearchByName}
                                     />
-                                    <Tooltip title='重置查询'>
+                                    <Tooltip title={<FormattedMessage id="reset" />}>
 
                                         <Button icon={<UndoOutlined/>} onClick={() => {
                                             this.inputRefOfName.current.setValue('');
@@ -322,40 +290,17 @@ class Topic extends Component {
 
                                     <Divider type="vertical"/>
 
-                                    <Tooltip title="创建Topic">
+                                    <Tooltip title={<FormattedMessage id="create-topic" />}>
                                         <Button type="dashed" icon={<PlusOutlined/>}
-                                                onClick={() => this.showModal('创建Topic')}>
+                                                onClick={() => this.showModal(<FormattedMessage id="create-topic" />)}>
 
                                         </Button>
                                     </Tooltip>
 
-                                    <Tooltip title="刷新列表">
+                                    <Tooltip title={<FormattedMessage id="refresh" />}>
                                         <Button icon={<SyncOutlined/>} onClick={() => {
                                             this.loadTableData(this.state.queryParams)
                                         }}>
-
-                                        </Button>
-                                    </Tooltip>
-
-                                    <Tooltip title="批量删除">
-                                        <Button type="primary" danger disabled={!hasSelected} icon={<DeleteOutlined/>}
-                                                loading={this.state.delBtnLoading}
-                                                onClick={() => {
-                                                    const content = <div>
-                                                        您确定要删除选中的<Text style={{color: '#1890FF'}}
-                                                                       strong>{this.state.selectedRowKeys.length}</Text>条记录吗？
-                                                    </div>;
-                                                    confirm({
-                                                        icon: <ExclamationCircleOutlined/>,
-                                                        content: content,
-                                                        onOk: () => {
-                                                            this.batchDelete()
-                                                        },
-                                                        onCancel() {
-
-                                                        },
-                                                    });
-                                                }}>
 
                                         </Button>
                                     </Tooltip>
@@ -366,7 +311,6 @@ class Topic extends Component {
                     </div>
 
                     <Table
-                        rowSelection={rowSelection}
                         rowKey='id'
                         dataSource={this.state.items}
                         columns={columns}
@@ -376,7 +320,7 @@ class Topic extends Component {
                         pagination={{
                             showSizeChanger: true,
                             total: this.state.items.length,
-                            showTotal: total => `总计 ${total} 条`
+                            showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
                         }}
                     />
 
@@ -392,7 +336,7 @@ class Topic extends Component {
                             /> : undefined
                     }
 
-                    <Modal title="分区扩容"
+                    <Modal title={<FormattedMessage id="topic-alter" />}
                            visible={this.state.createPartitionVisible}
                            confirmLoading={this.state.createPartitionConfirmLoading}
                            onOk={() => {
@@ -422,9 +366,9 @@ class Topic extends Component {
                                })
                            }}>
                         <Form ref={this.form} {...formItemLayout}>
-                            <Form.Item label="分区数量" name='totalCount' rules={[{required: true}]}>
+                            <Form.Item label={<FormattedMessage id="numPartitions" />} name='totalCount' rules={[{required: true}]}>
                                 <InputNumber min={this.state.selectedRow['partitionsCount']}
-                                             placeholder={'不能小于当前分区数量：' + this.state.selectedRow["partitionsCount"]}
+                                             placeholder={"Can't be less than the current: " + this.state.selectedRow["partitionsCount"]}
                                              style={{width: '100%'}}/>
                             </Form.Item>
                         </Form>

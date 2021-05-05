@@ -1,13 +1,14 @@
 import React from 'react';
 import {Form, Input, Modal, InputNumber} from "antd/lib/index";
+import {FormattedMessage} from "react-intl";
 
 const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model, brokerCount}) => {
 
     const [form] = Form.useForm();
 
     const formItemLayout = {
-        labelCol: {span: 6},
-        wrapperCol: {span: 14},
+        labelCol: {span: 8},
+        wrapperCol: {span: 12},
     };
 
     if (model === null || model === undefined) {
@@ -38,8 +39,8 @@ const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model, broke
             }}
             onCancel={handleCancel}
             confirmLoading={confirmLoading}
-            okText='确定'
-            cancelText='取消'
+            okText={<FormattedMessage id="okText" />}
+            cancelText={<FormattedMessage id="cancelText" />}
         >
 
             <Form form={form} {...formItemLayout} initialValues={model}>
@@ -47,17 +48,17 @@ const TopicModal = ({title, handleOk, handleCancel, confirmLoading, model, broke
                     <Input hidden={true}/>
                 </Form.Item>
 
-                <Form.Item label="Topic名称" name='name' rules={[{required: true, message: '请输入Topic名称'}]}>
-                    <Input placeholder="请输入Topic名称"/>
+                <Form.Item label={<FormattedMessage id="name" />} name='name' rules={[{required: true}]}>
+                    <Input placeholder=""/>
                 </Form.Item>
 
-                <Form.Item label="分区数量" name='numPartitions' rules={[{required: true}]}>
-                    <InputNumber min={1} style={{width: '100%'}} placeholder={'分区数量应与消费者客户端数量一致'}/>
+                <Form.Item label={<FormattedMessage id="numPartitions" />} name='numPartitions' rules={[{required: true}]}>
+                    <InputNumber min={1} style={{width: '100%'}} placeholder={'The number of partitions should be consistent with the number of consumer clients'}/>
                 </Form.Item>
 
-                <Form.Item label="副本数量" name='replicationFactor' rules={[{required: true}]}>
+                <Form.Item label={<FormattedMessage id="replicationFactor" />} name='replicationFactor' rules={[{required: true}]}>
                     <InputNumber min={1} max={brokerCount} style={{width: '100%'}}
-                                 placeholder={'副本数量不能大于集群broker数量: ' + brokerCount}/>
+                                 placeholder={'The number of copies cannot be greater than the number of cluster Broker: ' + brokerCount}/>
                 </Form.Item>
 
             </Form>

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import request from "../common/request";
 import {Button, Col, PageHeader, Row, Table, Tooltip, Typography} from "antd";
+import {FormattedMessage} from "react-intl";
 
 const {Title} = Typography;
 
@@ -77,7 +78,7 @@ class Broker extends Component {
                             this.props.history.goBack();
                         }}
                         title={this.state.clusterName}
-                        subTitle={'Broker 管理'}
+                        subTitle={<FormattedMessage id="broker-management" />}
                     />
                 </div>
 
@@ -102,7 +103,7 @@ class Broker extends Component {
                         pagination={{
                             showSizeChanger: true,
                             total: this.state.items.length,
-                            showTotal: total => `总计 ${total} 条`
+                            showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
                         }}
                     />
                 </div>

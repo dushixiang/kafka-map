@@ -10,6 +10,7 @@ import {
 import request from "../common/request";
 import {Link} from "react-router-dom";
 import qs from "qs";
+import {FormattedMessage} from "react-intl";
 
 const {Title} = Typography;
 
@@ -141,7 +142,7 @@ class ConsumerGroupInfo extends Component {
                             this.props.history.goBack();
                         }}
                         title={this.state.groupId}
-                        subTitle="消费组详情"
+                        subTitle={<FormattedMessage id="consumer-group-detail" />}
                     >
                         <Row>
                             <Space size='large'>
@@ -155,7 +156,7 @@ class ConsumerGroupInfo extends Component {
                     <div style={{marginBottom: 20}}>
                         <Row justify="space-around" align="middle" gutter={24}>
                             <Col span={8} key={1}>
-                                <Title level={3}>订阅主题</Title>
+                                <Title level={3}><FormattedMessage id="subscribed-topic" /></Title>
                             </Col>
                             <Col span={16} key={2} style={{textAlign: 'right'}}>
                                 <Space>
@@ -175,7 +176,7 @@ class ConsumerGroupInfo extends Component {
                         pagination={{
                             showSizeChanger: true,
                             total: this.state.items.length,
-                            showTotal: total => `总计 ${total} 条`
+                            showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
                         }}
                     />
                 </div>

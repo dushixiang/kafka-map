@@ -19,6 +19,7 @@ import {
     UndoOutlined
 } from '@ant-design/icons';
 import {Link} from "react-router-dom";
+import {FormattedMessage} from "react-intl";
 
 const {Search} = Input;
 const {Title} = Typography;
@@ -110,14 +111,14 @@ class ConsumerGroup extends Component {
     render() {
 
         const columns = [{
-                title: '序号',
+                title: <FormattedMessage id="index" />,
                 dataIndex: 'id',
                 key: 'id',
                 render: (id, record, index) => {
                     return index + 1;
                 }
             }, {
-                title: '消费组名称',
+                title: <FormattedMessage id="name" />,
                 dataIndex: 'groupId',
                 key: 'groupId',
                 defaultSortOrder: 'ascend',
@@ -129,7 +130,7 @@ class ConsumerGroup extends Component {
                     </Link>
                 }
             }, {
-                title: '主题数量',
+                title: <FormattedMessage id="topic-count" />,
                 dataIndex: 'topicCount',
                 key: 'topicCount',
                 sorter: (a, b) => a['topics'].length - b['topics'].length,
@@ -141,24 +142,24 @@ class ConsumerGroup extends Component {
                             to={`/topic-info?clusterId=${this.state.clusterId}&topic=${item}`}>{item}</Link></List.Item>}
                     />
 
-                    return <Popover content={content} title={'「' + record['groupId'] + '」消费的主题列表'}>
+                    return <Popover content={content} title={<FormattedMessage id="topic-list" />}>
                         <Button type="link" size='small'>{record['topics'].length}</Button>
                     </Popover>
                 }
 
             },
                 {
-                    title: '操作',
+                    title: <FormattedMessage id="operate" />,
                     key: 'action',
                     render: (text, record, index) => {
                         return (
                             <div>
                                 <Popconfirm
-                                    title="您确认要删除此消费组吗?"
+                                    title={<FormattedMessage id="delete-confirm" />}
                                     onConfirm={() => this.delete(record['groupId'], index)}
                                 >
                                     <Button type="text" size='small' danger
-                                            loading={this.state.items[index]['deleting']}>删除</Button>
+                                            loading={this.state.items[index]['deleting']}><FormattedMessage id="delete" /></Button>
                                 </Popconfirm>
 
 
@@ -177,7 +178,7 @@ class ConsumerGroup extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        subTitle={'消费组管理'}
+                        subTitle={<FormattedMessage id="consumer-group-management" />}
                         title={this.state.clusterName}
                     />
                 </div>
@@ -192,11 +193,11 @@ class ConsumerGroup extends Component {
                                 <Space>
                                     <Search
                                         ref={this.inputRefOfName}
-                                        placeholder="group id"
+                                        placeholder="Group ID"
                                         allowClear
                                         onSearch={this.handleSearchByName}
                                     />
-                                    <Tooltip title='重置查询'>
+                                    <Tooltip title={<FormattedMessage id="reset" />}>
 
                                         <Button icon={<UndoOutlined/>} onClick={() => {
                                             this.inputRefOfName.current.setValue('');
@@ -213,7 +214,7 @@ class ConsumerGroup extends Component {
 
                                     <Divider type="vertical"/>
 
-                                    <Tooltip title="刷新列表">
+                                    <Tooltip title={<FormattedMessage id="refresh" />}>
                                         <Button icon={<SyncOutlined/>} onClick={() => {
                                             this.loadTableData(this.state.queryParams)
                                         }}>
@@ -235,7 +236,7 @@ class ConsumerGroup extends Component {
                         pagination={{
                             showSizeChanger: true,
                             total: this.state.items.length,
-                            showTotal: total => `总计 ${total} 条`
+                            showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
                         }}
                     />
 

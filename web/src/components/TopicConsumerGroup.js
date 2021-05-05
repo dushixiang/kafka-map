@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import request from "../common/request";
 import {Button, Drawer, Table} from "antd";
 import TopicConsumerGroupOffset from "./TopicConsumerGroupOffset";
+import {FormattedMessage} from "react-intl";
 
 class TopicConsumerGroup extends Component {
 
@@ -38,7 +39,7 @@ class TopicConsumerGroup extends Component {
     render() {
 
         const columns = [{
-            title: '消费组名称',
+            title: 'Group ID',
             dataIndex: 'groupId',
             key: 'groupId',
             render: (groupId, record) => {
@@ -70,7 +71,7 @@ class TopicConsumerGroup extends Component {
                     pagination={{
                         showSizeChanger: true,
                         total: this.state.items.length,
-                        showTotal: total => `总计 ${total} 条`
+                        showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
                     }}
                 />
 

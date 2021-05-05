@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons';
 import ClusterModal from "./ClusterModal";
 import {Link} from "react-router-dom";
+import {FormattedMessage} from "react-intl";
 
 const confirm = Modal.confirm;
 const {Search} = Input;
@@ -39,7 +40,7 @@ class Cluster extends Component {
 
     async delete(id) {
         await request.delete('/clusters/' + id);
-        message.success('删除成功');
+        message.success('success');
         await this.loadTableData(this.state.queryParams);
     }
 
@@ -156,7 +157,7 @@ class Cluster extends Component {
             if (formData.id) {
                 // 向后台提交数据
                 await request.put('/clusters/' + formData.id, {'name': formData['name']});
-                message.success('修改成功', 3);
+                message.success('success', 3);
                 this.setState({
                     modalVisible: false
                 });
@@ -164,7 +165,7 @@ class Cluster extends Component {
             } else {
                 // 向后台提交数据
                 await request.post('/clusters', formData);
-                message.success('接入成功', 3);
+                message.success('success', 3);
                 this.setState({
                     modalVisible: false
                 });
@@ -185,13 +186,13 @@ class Cluster extends Component {
         try {
             let result = await request.delete('/clusters/' + this.state.selectedRowKeys.join(','));
             if (result.code === 1) {
-                message.success('操作成功', 3);
+                message.success('success', 3);
                 this.setState({
                     selectedRowKeys: []
                 })
                 await this.loadTableData(this.state.queryParams);
             } else {
-                message.error('删除失败 :( ' + result.message, 10);
+                message.error(+ result.message, 10);
             }
         } finally {
             this.setState({
@@ -203,14 +204,14 @@ class Cluster extends Component {
     render() {
 
         const columns = [{
-            title: '序号',
+            title: <FormattedMessage id="index" />,
             dataIndex: 'id',
             key: 'id',
             render: (id, record, index) => {
                 return index + 1;
             }
         }, {
-            title: '集群名称',
+            title: <FormattedMessage id="name" />,
             dataIndex: 'name',
             key: 'name',
             render: (name, record) => {
@@ -226,11 +227,11 @@ class Cluster extends Component {
             },
             sorter: true,
         }, {
-            title: '集群地址',
+            title: <FormattedMessage id="servers" />,
             dataIndex: 'servers',
             key: 'servers',
         }, {
-            title: 'Topic数量',
+            title: <FormattedMessage id="topic" />,
             dataIndex: 'topicCount',
             key: 'topicCount',
             render: (topicCount, record, index) => {
@@ -240,7 +241,7 @@ class Cluster extends Component {
                 </Link>
             }
         }, {
-            title: 'Broker数量',
+            title: <FormattedMessage id="broker" />,
             dataIndex: 'brokerCount',
             key: 'brokerCount',
             render: (brokerCount, record, index) => {
@@ -249,7 +250,7 @@ class Cluster extends Component {
                 </Link>
             }
         }, {
-            title: '消费组数量',
+            title: <FormattedMessage id="consumer-group" />,
             dataIndex: 'consumerCount',
             key: 'consumerCount',
             render: (consumerCount, record, index) => {
@@ -258,7 +259,7 @@ class Cluster extends Component {
                 </Link>
             }
         }, {
-            title: '创建时间',
+            title: <FormattedMessage id="created" />,
             dataIndex: 'created',
             key: 'created',
             render: (text, record) => {
@@ -271,19 +272,19 @@ class Cluster extends Component {
             sorter: true,
         },
             {
-                title: '操作',
+                title: <FormattedMessage id="operate" />,
                 key: 'action',
                 render: (text, record, index) => {
                     return (
                         <div>
                             <Button type="link" size='small' onClick={() => {
-                                this.showModal('编辑集群', record)
-                            }}>编辑</Button>
+                                this.showModal(<FormattedMessage id="edit" />, record)
+                            }}><FormattedMessage id="edit" /></Button>
                             <Popconfirm
-                                title="您确认要移除此集群吗?"
+                                title={<FormattedMessage id="delete-confirm" />}
                                 onConfirm={() => this.delete(record['id'])}
                             >
-                                <Button type="text" size='small' danger>移除</Button>
+                                <Button type="text" size='small' danger><FormattedMessage id="delete" /></Button>
                             </Popconfirm>
                         </div>
                     )
@@ -306,18 +307,18 @@ class Cluster extends Component {
 
                     <Row justify="space-around" align="middle" gutter={24}>
                         <Col span={12} key={1}>
-                            <Title level={3}>集群管理</Title>
+                            <Title level={3}><FormattedMessage id="cluster" /></Title>
                         </Col>
                         <Col span={12} key={2} style={{textAlign: 'right'}}>
                             <Space>
                                 <Search
                                     ref={this.inputRefOfName}
-                                    placeholder="集群名称"
+                                    placeholder={'name'}
                                     allowClear
                                     onSearch={this.handleSearchByName}
                                 />
 
-                                <Tooltip title='重置查询'>
+                                <Tooltip title={<FormattedMessage id="reset" />}>
 
                                     <Button icon={<UndoOutlined/>} onClick={() => {
                                         this.inputRefOfName.current.setValue('');
@@ -329,14 +330,14 @@ class Cluster extends Component {
 
                                 <Divider type="vertical"/>
 
-                                <Tooltip title="接入集群">
+                                <Tooltip title={<FormattedMessage id="import-cluster" />}>
                                     <Button type="dashed" icon={<PlusOutlined/>}
-                                            onClick={() => this.showModal('接入集群')}>
+                                            onClick={() => this.showModal(<FormattedMessage id="import-cluster" />)}>
 
                                     </Button>
                                 </Tooltip>
 
-                                <Tooltip title="刷新列表">
+                                <Tooltip title={<FormattedMessage id="refresh" />}>
                                     <Button icon={<SyncOutlined/>} onClick={() => {
                                         this.loadTableData(this.state.queryParams)
                                     }}>
@@ -344,7 +345,7 @@ class Cluster extends Component {
                                     </Button>
                                 </Tooltip>
 
-                                <Tooltip title="批量删除">
+                                <Tooltip title={<FormattedMessage id="batch-delete" />}>
                                     <Button type="primary" danger disabled={!hasSelected} icon={<DeleteOutlined/>}
                                             loading={this.state.delBtnLoading}
                                             onClick={() => {
@@ -385,7 +386,7 @@ class Cluster extends Component {
                         onChange: this.handleChangPage,
                         onShowSizeChange: this.handleChangPage,
                         total: this.state.total,
-                        showTotal: total => `总计 ${total} 条`
+                        showTotal: total => {return <FormattedMessage id="total-items" values={{total: total}}/>}
                     }}
                     loading={this.state.loading}
                 />
