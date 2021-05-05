@@ -2,60 +2,60 @@
 
 给编程插上翅膀，给kafka装上导航。
 
-## 快速了解
+[中文文档](README_zh.MD)
 
-`kafka map`是使用`Java8`和`React`给`Apache Kafka`开发的一款web ui工具。
-通过这款工具可以很方便直观的查看Broker、 topics、 partitions、consumers等信息，以及查看Topic中的消息。
+## Get Started
 
-目前支持的功能有：
+kafka-map is a concise kafka web manager that allows you to view and manage information such as Broker, Topic, Partition, Consumer Group, and retrieve messages from Topic.
 
-- 多集群管理
-- topic监控 —— 查看分区数量、副本数量、存储大小、offset
-- topic管理 —— 创建、删除、扩容
-- broker查看 —— Partitions as Leader、	Partitions as Follower
-- consumer管理（查看、删除）
-- 重置offset
-- 消费消息 —— 支持String和json方式展示
+Supported features:
 
-## 截图
+- Multi-cluster management
+- Topic Monitoring - View the number of partitions, number of copies, storage size, offset
+- Topic Management - Create, Delete, Expand
+- Broker Monitoring —— Partitions as Leader、	Partitions as Follower
+- Consumer Management (View, Delete)
+- Reset offset
+- Consumer message - support String and JSON mode display
 
-[截图](docs/screenshot.md)
+## Screenshots
 
-## 协议与条款
+[Screenshots](docs/screenshot.md)
 
-如您需要在企业网络中使用 `kafka-map` ，建议先征求 IT 管理员的同意。下载、使用或分发 `kafka-map` 前，您必须同意 [协议](./LICENSE) 条款与限制。本项目不提供任何担保，亦不承担任何责任。
+## Disclaimer
 
-## 依赖环境
+Developers wishing to use `kafka-map` within a corporate network are advised to seek approval from their administrators or management before using the tool. By downloading, using, or distributing `kafka-map`, you agree to the [LICENSE](LICENSE) terms & conditions. No warranty or liability is provided.
 
-- Java8 或更高版本
-- Apache Kafka 1.1.0 或更高版本
+## Dependencies
+
+- Java8 or higher version
+- Apache Kafka 1.1.0 or higher version
 
 
-## 快速安装
+## Quick installation
 
-下载
+Download
 ```shell
 wget https://github.com/dushixiang/kafka-map/releases/latest/download/kafka-map.tgz
 ```
 
-解压
+Decompression
 ```shell
 tar -zxvf kafka-map.tgz -C /usr/local/
 ```
 
-### 前台运行
+### Front run
 ```shell
-# kafka-map文件夹
+# kafka-map folder
 cd /usr/local/kafka-map
-# 启动
+# run
 java -jar kafka-map.jar 
 ```
 
-### 系统服务方式运行
+### System service is running
 
-在 `/etc/systemd/system/` 下创建 `kafka-map.service` 并写入以下内容
+Create a `kafka-map.service` at `/etc/systemd/system/` and write the following
 
-> 根据自身实际情况修改 WorkingDirectory 和 ExecStart下面的程序所在目录及java
 ```shell
 [Unit]
 Description=kafka map service
@@ -70,7 +70,7 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
-重载系统服务&&设置开机启动&&启动服务&&查看状态
+Heavy Duty System Services && Settings Boot Launch && Startup Service && View Status
 
 ```shell
 systemctl daemon-reload
@@ -79,19 +79,19 @@ systemctl start kafka-map
 systemctl status kafka-map
 ```
 
-### 使用
+### How to use
 
-接下来使用浏览器打开服务器的 `8080` 端口即可访问。
+Next, use the browser to open the `8080` port you can access.
 
 ## FAQ
 
 <details>
-    <summary>不想使用8080端口怎么办？</summary>
+    <summary>What should I do if I don't want to use the 8080 port?</summary>
 
-在启动命令上增加 `--server.port=1234` 即可修改端口为 `1234`。
+Add the port on the launch command to modify the port to `1234`
 
 ```shell
-# 示例
+# example
 java -jar kafka-map.jar --server.port=1234
 ```
 </details>
