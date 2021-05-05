@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import request from "../common/request";
-import {Button, List, Table, Tooltip} from "antd";
+import {List} from "antd";
 
 class TopicConfig extends Component {
 

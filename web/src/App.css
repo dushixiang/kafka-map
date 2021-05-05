@@ -6,13 +6,32 @@
     color: white;
     width: 80%;
     margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 16px;
 }
 
-.ka-header-logo {
+.km-header-logo {
     font-size: 18px;
     font-weight: 500;
     cursor: pointer;
     color: white;
+}
+
+.km-header-right {
+    text-align: right;
+}
+
+.km-header-right-item {
+    cursor: pointer;
+    padding: 23px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    vertical-align: middle;
 }
 
 .km-container {

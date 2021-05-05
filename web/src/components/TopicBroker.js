@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import request from "../common/request";
 import {Button, Table, Tooltip} from "antd";
+import {FormattedMessage} from "react-intl";
 
 class TopicBroker extends Component {
 
@@ -73,7 +74,7 @@ class TopicBroker extends Component {
                     pagination={{
                         showSizeChanger: true,
                         total: this.state.items.length,
-                        showTotal: total => `总计 ${total} 条`
+                        showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
                     }}
                 />
             </div>

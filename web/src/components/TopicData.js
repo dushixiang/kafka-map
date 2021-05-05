@@ -21,6 +21,7 @@ import {
     DownCircleTwoTone
 } from '@ant-design/icons';
 import {Input} from "antd/lib/index";
+import {FormattedMessage} from "react-intl";
 
 const {Text} = Typography;
 
@@ -84,7 +85,7 @@ class TopicData extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        subTitle={'数据拉取'}
+                        subTitle={<FormattedMessage id="consume-message" />}
                         title={this.state.topic}
                     >
                         <Row>
@@ -154,7 +155,7 @@ class TopicData extends Component {
                             <Col span={4}>
                                 <Form.Item
                                     name={'count'}
-                                    label={'消息数量'}
+                                    label={'Count'}
                                 >
                                     <InputNumber min={1} style={{width: 100}}/>
                                 </Form.Item>
@@ -183,7 +184,7 @@ class TopicData extends Component {
                         <Row>
                             <Col span={24} style={{ textAlign: 'right' }}>
                                 <Button type="primary" htmlType="submit" loading={this.state.loading} style={{ margin: '0 8px' }}>
-                                    拉取
+                                    <FormattedMessage id="pull" />
                                 </Button>
 
                                 <Button type="default" danger onClick={() => {
@@ -191,7 +192,7 @@ class TopicData extends Component {
                                         items: []
                                     })
                                 }}>
-                                    清空
+                                    <FormattedMessage id="reset" />
                                 </Button>
                             </Col>
                         </Row>

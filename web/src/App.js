@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import 'antd/dist/antd.css';
 import './App.css';
-import {Layout} from 'antd';
+import {ConfigProvider, Dropdown, Layout, Menu} from 'antd';
 import {Link, Route, Switch} from 'react-router-dom';
 import Cluster from "./components/Cluster";
 import Topic from "./components/Topic";
@@ -11,48 +11,132 @@ import Broker from "./components/Broker";
 import ConsumerGroup from "./components/ConsumerGroup";
 import ConsumerGroupInfo from "./components/ConsumerGroupInfo";
 import {NT_PACKAGE} from "./utils/utils";
+import zhCN from "antd/es/locale-provider/zh_CN";
+import enUS from "antd/es/locale-provider/en_US";
+import zh_CN from './locales/zh_CN';
+import en_US from './locales/en_US';
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import 'dayjs/locale/zh-cn';
+import { IntlProvider } from 'react-intl';
 
 const {Header, Content, Footer} = Layout;
+
+dayjs.extend(relativeTime);
 
 class App extends Component {
 
     state = {
         package: NT_PACKAGE(),
+        locale: 'en-us'
+    }
+
+    componentDidMount() {
+        let locale = localStorage.getItem('locale');
+        if (!locale) {
+            locale = 'en-us';
+        }
+        dayjs.locale(locale);
+        this.setState({
+            locale: locale
+        })
+    }
+
+    setLocale = (locale) => {
+        localStorage.setItem('locale', locale);
+        window.location.reload();
+    }
+
+    getAntDesignLocale = (locale) => {
+        switch (locale) {
+            case 'en-us':
+                return enUS;
+            case 'zh-cn':
+                return zhCN;
+            default:
+                return undefined;
+        }
     }
 
     render() {
-        return (
-            <div className="App">
-                <Switch>
-                    <Route>
-                        <Layout style={{minHeight: '100vh'}}>
-                            <Header className="header">
-                                <div className='km-header'>
-                                    <Link to={'/'}>
-                                        <span className='ka-header-logo'>Kafka Map</span>
-                                    </Link>
-                                </div>
-                            </Header>
-                            <Content className='km-container'>
-                                <Layout>
-                                    <Content>
-                                        <Route path="/" exact component={Cluster}/>
-                                        <Route path="/topic" component={Topic}/>
-                                        <Route path="/broker" component={Broker}/>
-                                        <Route path="/consumer-group" component={ConsumerGroup}/>
-                                        <Route path="/consumer-group-info" component={ConsumerGroupInfo}/>
-                                        <Route path="/topic-info" component={TopicInfo}/>
-                                        <Route path="/topic-data" component={TopicData}/>
-                                    </Content>
-                                </Layout>
-                            </Content>
-                            <Footer style={{textAlign: 'center'}}>kafka map ©2021 Created by dushixiang
-                                Version:{this.state.package['version']}</Footer>
-                        </Layout>
-                    </Route>
-                </Switch>
 
-            </div>
+        const menu = (
+            <Menu>
+                <Menu.Item>
+                    <a rel="noopener noreferrer" href="#" onClick={() => {
+                        this.setLocale('zh-cn');
+                    }}>
+                        简体中文
+                    </a>
+                </Menu.Item>
+                <Menu.Item>
+                    <a rel="noopener noreferrer" href="#" onClick={() => {
+                        this.setLocale('en-us');
+                    }}>
+                        English
+                    </a>
+                </Menu.Item>
+            </Menu>
+        );
+
+        let messages = {}
+        messages['en-us'] = en_US;
+        messages['zh-cn'] = zh_CN;
+
+        return (
+            <IntlProvider locale={this.state.locale} messages={messages[this.state.locale]}>
+                <ConfigProvider locale={this.getAntDesignLocale(this.state.locale)}>
+                    <div className="App">
+                        <Switch>
+                            <Route>
+                                <Layout style={{minHeight: '100vh'}}>
+                                    <Header className="header">
+                                        <div className='km-header'>
+                                            <div style={{flex: '1 1 0%'}}>
+                                                <Link to={'/'}>
+                                                    <span className='km-header-logo'>Kafka Map</span>
+                                                </Link>
+                                            </div>
+                                            <div className='km-header-right'>
+                                                <Dropdown overlay={menu}>
+                                                <span className={'km-header-right-item'}>
+                                                <i className="anticon">
+                                                    <svg viewBox="0 0 24 24" focusable="false" width="1em" height="1em"
+                                                         fill="currentColor" aria-hidden="true">
+                                                        <path d="M0 0h24v24H0z" fill="none"/>
+                                                        <path
+                                                            d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z "
+                                                            className="css-c4d79v"/>
+                                                    </svg>
+                                                </i>
+                                            </span>
+                                                </Dropdown>
+                                            </div>
+                                        </div>
+                                    </Header>
+                                    <Content className='km-container'>
+                                        <Layout>
+                                            <Content>
+                                                <Route path="/" exact component={Cluster}/>
+                                                <Route path="/topic" component={Topic}/>
+                                                <Route path="/broker" component={Broker}/>
+                                                <Route path="/consumer-group" component={ConsumerGroup}/>
+                                                <Route path="/consumer-group-info" component={ConsumerGroupInfo}/>
+                                                <Route path="/topic-info" component={TopicInfo}/>
+                                                <Route path="/topic-data" component={TopicData}/>
+                                            </Content>
+                                        </Layout>
+                                    </Content>
+                                    <Footer style={{textAlign: 'center'}}>kafka map ©2021 Created by dushixiang
+                                        Version:{this.state.package['version']}</Footer>
+                                </Layout>
+                            </Route>
+                        </Switch>
+
+                    </div>
+                </ConfigProvider>
+            </IntlProvider>
+
         );
     }
 

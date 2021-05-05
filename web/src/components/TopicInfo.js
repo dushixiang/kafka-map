@@ -7,6 +7,7 @@ import {Link} from "react-router-dom";
 import request from "../common/request";
 import {renderSize} from "../utils/utils";
 import TopicConfig from "./TopicConfig";
+import {FormattedMessage} from "react-intl";
 
 const {TabPane} = Tabs;
 
@@ -53,24 +54,24 @@ class TopicInfo extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        subTitle={'主题详情'}
+                        subTitle={<FormattedMessage id="topic-detail" />}
                         title={this.state.topic}
                         extra={[
                             <Button key="2" onClick={() => {
-                                message.warn('功能尚未实现，敬请期待。');
-                            }}>导入数据</Button>,
+                                message.warn('Not yet implemented.');
+                            }}><FormattedMessage id="produce-message" /></Button>,
                             <Link to={`/topic-data?clusterId=${this.state.clusterId}&topic=${this.state.topic}`}>
                                 <Button key="1" type="primary">
-                                    拉取数据
+                                    <FormattedMessage id="consume-message" />
                                 </Button>
                             </Link>,
                         ]}
                     >
                         <Row>
                             <Space size='large'>
-                                <Statistic title="分区数量" value={this.state.topicInfo['partitions'].length}/>
-                                <Statistic title="副本数量" value={this.state.topicInfo['replicaCount']}/>
-                                <Statistic title="数据大小" value={renderSize(this.state.topicInfo['totalLogSize'])}/>
+                                <Statistic title={<FormattedMessage id="numPartitions" />} value={this.state.topicInfo['partitions'].length}/>
+                                <Statistic title={<FormattedMessage id="replicationFactor" />} value={this.state.topicInfo['replicaCount']}/>
+                                <Statistic title={<FormattedMessage id="log-size" />} value={renderSize(this.state.topicInfo['totalLogSize'])}/>
                             </Space>
                         </Row>
                     </PageHeader>
@@ -78,27 +79,27 @@ class TopicInfo extends Component {
 
                 <div className='kd-content'>
                     <Tabs defaultActiveKey='0' onChange={this.handleTabChange}>
-                        <TabPane tab="分区信息" key="partition">
+                        <TabPane tab={<FormattedMessage id="partitions" />} key="partition">
                             <TopicPartition
                                 clusterId={this.state.clusterId}
                                 topic={this.state.topic}>}
                             </TopicPartition>
                         </TabPane>
-                        <TabPane tab="Broker信息" key="broker">
+                        <TabPane tab={<FormattedMessage id="brokers" />} key="broker">
                             <TopicBroker
                                 clusterId={this.state.clusterId}
                                 topic={this.state.topic}>
 
                             </TopicBroker>
                         </TabPane>
-                        <TabPane tab="消费组信息" key="consumer-group">
+                        <TabPane tab={<FormattedMessage id="consumer-groups" />} key="consumer-group">
                             <TopicConsumerGroup
                                 clusterId={this.state.clusterId}
                                 topic={this.state.topic}>
 
                             </TopicConsumerGroup>
                         </TabPane>
-                        <TabPane tab="配置" key="topic-config">
+                        <TabPane tab={<FormattedMessage id="topic-config" />} key="topic-config">
                             <TopicConfig
                                 clusterId={this.state.clusterId}
                                 topic={this.state.topic}>

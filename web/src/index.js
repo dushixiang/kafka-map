@@ -3,23 +3,13 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import zhCN from 'antd/es/locale-provider/zh_CN';
-import {ConfigProvider} from 'antd';
 import {HashRouter as Router} from "react-router-dom";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import 'dayjs/locale/zh-cn'
-
-dayjs.extend(relativeTime);
-dayjs.locale('zh-cn');
 
 ReactDOM.render(
     <React.StrictMode>
-        <ConfigProvider locale={zhCN}>
-            <Router>
-                <App/>
-            </Router>
-        </ConfigProvider>
+        <Router>
+            <App/>
+        </Router>
     </React.StrictMode>,
     document.getElementById('root')
 );

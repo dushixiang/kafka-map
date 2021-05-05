@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Button, Space, Table, Tooltip} from "antd";
 import {arrayEquals, renderSize} from "../utils/utils";
 import request from "../common/request";
+import {FormattedMessage} from "react-intl";
 
 class TopicPartition extends Component {
 
@@ -55,7 +56,7 @@ class TopicPartition extends Component {
             key: 'endOffset',
             sorter: (a, b) => a['endOffset'] - b['endOffset'],
         }, {
-            title: '数据大小',
+            title: 'Log Size',
             dataIndex: 'y',
             key: 'y',
             sorter: (a, b) => a['replicas'].map(item => item['logSize']).reduce((a, b) => a + b, 0) - b['replicas'].map(item => item['logSize']).reduce((a, b) => a + b, 0),
@@ -67,7 +68,7 @@ class TopicPartition extends Component {
                 return renderSize(totalLogSize)
             }
         }, {
-            title: '副本',
+            title: 'Replicas',
             dataIndex: 'replicas',
             key: 'replicas',
             render: (replicas, record, index) => {
@@ -84,7 +85,7 @@ class TopicPartition extends Component {
                 </Space>;
             }
         }, {
-            title: '（已同步副本）ISR',
+            title: 'ISR',
             dataIndex: 'isr',
             key: 'isr',
             render: (isr, record, index) => {
@@ -97,11 +98,11 @@ class TopicPartition extends Component {
                 </Space>;
             }
         }, {
-            title: '是否同步',
+            title: 'Sync',
             dataIndex: 'partition',
             key: 'partition',
             render: (partition, record, index) => {
-                return arrayEquals(record['replicas'], record['isr']) ? '是' : '否';
+                return arrayEquals(record['replicas'], record['isr']).toString();
             }
         }];
 
@@ -117,7 +118,7 @@ class TopicPartition extends Component {
                     pagination={{
                         showSizeChanger: true,
                         total: this.state.items.length,
-                        showTotal: total => `总计 ${total} 条`
+                        showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
                     }}
                 />
             </div>

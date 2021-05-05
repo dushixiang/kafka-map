@@ -15,6 +15,7 @@ import {
 } from "antd";
 import request from "../common/request";
 import {SyncOutlined} from "@ant-design/icons";
+import {FormattedMessage} from "react-intl";
 
 const {Title} = Typography;
 
@@ -90,7 +91,7 @@ class TopicConsumerGroupOffset extends Component {
                 return record['endOffset'] - record['consumerOffset']
             }
         }, {
-            title: '操作',
+            title: 'Operate',
             key: 'action',
             render: (text, record, index) => {
                 return (
@@ -100,7 +101,7 @@ class TopicConsumerGroupOffset extends Component {
                                 resetOffsetVisible: true,
                                 selectedRow: record
                             })
-                        }}>重置offset</Button>
+                        }}>Reset Offset</Button>
                     </div>
                 )
             },
@@ -111,11 +112,11 @@ class TopicConsumerGroupOffset extends Component {
                 <div style={{marginBottom: 20}}>
                     <Row justify="space-around" align="middle" gutter={24}>
                         <Col span={20} key={1}>
-                            <Title level={3}>消费详情</Title>
+                            <Title level={3}><FormattedMessage id="consume-detail" /></Title>
                         </Col>
                         <Col span={4} key={2} style={{textAlign: 'right'}}>
                             <Space>
-                                <Tooltip title="刷新列表">
+                                <Tooltip title={<FormattedMessage id="refresh" />}>
                                     <Button icon={<SyncOutlined/>} onClick={() => {
                                         let clusterId = this.state.clusterId;
                                         let topic = this.state.topic;
@@ -137,7 +138,7 @@ class TopicConsumerGroupOffset extends Component {
                        pagination={{
                            showSizeChanger: true,
                            total: this.state.items.length,
-                           showTotal: total => `总计 ${total} 条`
+                           showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
                        }}
                        loading={this.state.loading}
                 />
@@ -187,20 +188,20 @@ class TopicConsumerGroupOffset extends Component {
                         </div>
                     }
                 >
-                    <Alert message="请注意" description="重置前需关闭消费者客户端。" type="warning" showIcon
+                    <Alert message={<FormattedMessage id="reset-warning" />} description={<FormattedMessage id="reset-warning-description" />} type="warning" showIcon
                            style={{marginBottom: 16}}/>
 
                     <Form ref={this.form}>
-                        <Form.Item label="重置位置" name='seek' rules={[{required: true}]}>
+                        <Form.Item label={<FormattedMessage id="reset-partition" />} name='seek' rules={[{required: true}]}>
                             <Radio.Group onChange={(e) => {
                                 let seek = e.target.value;
                                 this.setState({
                                     'seek': seek
                                 })
                             }}>
-                                <Radio value={'end'}>最新</Radio>
-                                <Radio value={'beginning'}>最早</Radio>
-                                <Radio value={'custom'}>自定义</Radio>
+                                <Radio value={'end'}><FormattedMessage id="latest" /></Radio>
+                                <Radio value={'beginning'}><FormattedMessage id="earliest" /></Radio>
+                                <Radio value={'custom'}><FormattedMessage id="customization" /></Radio>
                             </Radio.Group>
                         </Form.Item>
 
