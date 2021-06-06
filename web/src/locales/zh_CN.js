@@ -51,8 +51,8 @@ const zh_CN = {
     'customization': '自定义',
     'consume-message': '拉取数据',
     'produce-message': '导入数据',
-
     'pull': '拉取',
+    'newest': '最新',
 }
 
 export default zh_CN;

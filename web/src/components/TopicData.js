@@ -35,7 +35,10 @@ class TopicData extends Component {
         loading: false,
         items: [],
         topicInfo: undefined,
-        partition: 0
+        offset: 0,
+        partition: 0,
+        count: 10,
+        autoOffsetReset: 'newest'
     }
 
     componentDidMount() {
@@ -53,6 +56,29 @@ class TopicData extends Component {
         let result = await request.get(`/topics/${topic}?clusterId=${clusterId}`);
         this.setState({
             topicInfo: result
+        }, this.handlePartitionChange);
+    }
+
+    handlePartitionChange = () => {
+        let endOffset = this.state.topicInfo['partitions'][this.state.partition]['endOffset'];
+        let beginningOffset = this.state.topicInfo['partitions'][this.state.partition]['beginningOffset'];
+        let offset = beginningOffset;
+        if ('newest' === this.state.autoOffsetReset) {
+            offset = endOffset - this.state.count;
+            if (offset < beginningOffset) {
+                offset = beginningOffset;
+            }
+        }
+        this.setState({
+            offset: offset
+        })
+        this.form.current.setFieldsValue({'offset': offset});
+        this.handleReset();
+    }
+
+    handleReset = () => {
+        this.setState({
+            items: []
         })
     }
 
@@ -85,7 +111,7 @@ class TopicData extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        subTitle={<FormattedMessage id="consume-message" />}
+                        subTitle={<FormattedMessage id="consume-message"/>}
                         title={this.state.topic}
                     >
                         <Row>
@@ -111,57 +137,86 @@ class TopicData extends Component {
                 <div className='kd-page-header' style={{padding: 20}}>
                     <Form ref={this.form} onFinish={this.pullMessage}
                           initialValues={{
-                              offset: 0,
-                              count: 10,
-                              partition: 0
+                              count: this.state.count,
+                              partition: this.state.partition,
+                              autoOffsetReset: this.state.autoOffsetReset,
                           }}>
-                        <Row>
-                            <Col span={4}>
+                        <Row gutter={24}>
+                            <Col span={6}>
                                 <Form.Item
                                     name={'partition'}
                                     label={'Partition'}
                                 >
-                                    <Select style={{width: 100}} onChange={(value) => {
+                                    <Select onChange={(value) => {
                                         this.setState({
                                             partition: value
-                                        })
+                                        }, this.handlePartitionChange);
                                     }}>
                                         {
                                             this.state.topicInfo ?
                                                 this.state.topicInfo['partitions'].map(item => {
-                                                    return <Select.Option
-                                                        value={item['partition']}>{item['partition']}</Select.Option>
+                                                    return <Select.Option key={'p' + item['partition']}
+                                                                          value={item['partition']}>{item['partition']}</Select.Option>
                                                 }) : undefined
                                         }
                                     </Select>
                                 </Form.Item>
                             </Col>
-                            <Col span={4}>
+
+                            <Col span={6}>
+                                <Form.Item
+                                    name={'autoOffsetReset'}
+                                    label={'Auto Offset Reset'}
+                                >
+                                    <Select onChange={(value) => {
+                                        this.setState({
+                                            autoOffsetReset: value
+                                        }, this.handlePartitionChange);
+                                    }}>
+                                        <Select.Option value="earliest">
+                                            <FormattedMessage id="earliest"/>
+                                        </Select.Option>
+                                        <Select.Option value="newest">
+                                            <FormattedMessage id="newest"/>
+                                        </Select.Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+
+                            <Col span={6}>
                                 <Form.Item
                                     name={'offset'}
                                     label={'Offset'}
                                 >
                                     {
                                         this.state.topicInfo ?
-                                            <InputNumber min={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
-                                                         max={this.state.topicInfo['partitions'][this.state.partition]['endOffset']}
-                                                         defaultValue={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
-                                                         style={{width: 120}}/>
+                                            <InputNumber
+                                                min={this.state.topicInfo['partitions'][this.state.partition]['beginningOffset']}
+                                                max={this.state.topicInfo['partitions'][this.state.partition]['endOffset']}
+                                                // defaultValue={this.state.topicInfo['partitions'][this.state.partition]['endOffset'] - this.state.count}
+                                                value={this.state.offset}
+                                                style={{width: '100%'}}
+                                                onChange={(value) => {
+                                                    this.setState({
+                                                        offset: value
+                                                    })
+                                                }}
+                                            />
                                             : undefined
                                     }
 
                                 </Form.Item>
                             </Col>
-                            <Col span={4}>
+                            <Col span={6}>
                                 <Form.Item
                                     name={'count'}
                                     label={'Count'}
                                 >
-                                    <InputNumber min={1} style={{width: 100}}/>
+                                    <InputNumber min={1} style={{width: '100%'}}/>
                                 </Form.Item>
                             </Col>
 
-                            <Col span={6} key='keyFilter' style={{paddingRight: 8}}>
+                            <Col span={6} key='keyFilter'>
                                 <Form.Item
                                     name={'keyFilter'}
                                     label={'key'}
@@ -179,21 +234,16 @@ class TopicData extends Component {
                                     <Input allowClear placeholder="filter value"/>
                                 </Form.Item>
                             </Col>
-                        </Row>
+                            <Col span={12} style={{textAlign: 'right'}}>
+                                <Space>
+                                    <Button type="primary" htmlType="submit" loading={this.state.loading}>
+                                        <FormattedMessage id="pull"/>
+                                    </Button>
 
-                        <Row>
-                            <Col span={24} style={{ textAlign: 'right' }}>
-                                <Button type="primary" htmlType="submit" loading={this.state.loading} style={{ margin: '0 8px' }}>
-                                    <FormattedMessage id="pull" />
-                                </Button>
-
-                                <Button type="default" danger onClick={() => {
-                                    this.setState({
-                                        items: []
-                                    })
-                                }}>
-                                    <FormattedMessage id="reset" />
-                                </Button>
+                                    <Button type="default" danger onClick={this.handleReset}>
+                                        <FormattedMessage id="reset"/>
+                                    </Button>
+                                </Space>
                             </Col>
                         </Row>
 

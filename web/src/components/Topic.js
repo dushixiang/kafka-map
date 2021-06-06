@@ -220,6 +220,13 @@ class Topic extends Component {
                     render: (text, record, index) => {
                         return (
                             <div>
+
+                                <Link to={`/topic-data?clusterId=${this.state.clusterId}&topic=${record['name']}`}>
+                                    <Button key="1" type="link" size='small'>
+                                        <FormattedMessage id="consume-message" />
+                                    </Button>
+                                </Link>
+
                                 <Button type="link" size='small' onClick={() => {
                                     this.setState({
                                         createPartitionVisible: true,

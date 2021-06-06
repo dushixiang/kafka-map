@@ -48,9 +48,10 @@ const en_US = {
     'latest': 'Latest',
     'earliest': 'Earliest',
     'customization': 'Customization',
-
     'consume-message': 'Consume Message',
     'produce-message': 'Produce Message',
+    'pull': 'Pull',
+    'newest': 'Newest',
 }
 
 export default en_US;
