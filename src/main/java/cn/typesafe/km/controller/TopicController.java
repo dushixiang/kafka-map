@@ -5,6 +5,7 @@ import cn.typesafe.km.service.ConsumerGroupService;
 import cn.typesafe.km.service.MessageService;
 import cn.typesafe.km.service.dto.*;
 import cn.typesafe.km.service.TopicService;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -93,6 +94,11 @@ public class TopicController {
                                       String keyFilter,
                                       String valueFilter) {
         return messageService.data(clusterId, topic, partition, offset, count, keyFilter, valueFilter);
+    }
+
+    @PostMapping("/{topic}/data")
+    public long data(@PathVariable String topic, @RequestParam String clusterId, @RequestBody TopicData topicData) {
+        return messageService.sendData(clusterId, topic, topicData);
     }
 
     @GetMapping("/{topic}/configs")

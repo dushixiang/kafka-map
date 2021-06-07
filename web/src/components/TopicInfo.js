@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, PageHeader, Statistic, Tabs, Row, Space, message} from "antd";
+import {Button, PageHeader, Statistic, Tabs, Row, Space, message, notification} from "antd";
 import TopicPartition from "./TopicPartition";
 import TopicBroker from "./TopicBroker";
 import TopicConsumerGroup from "./TopicConsumerGroup";
@@ -8,6 +8,8 @@ import request from "../common/request";
 import {renderSize} from "../utils/utils";
 import TopicConfig from "./TopicConfig";
 import {FormattedMessage} from "react-intl";
+import ClusterModal from "./ClusterModal";
+import SendMessageModal from "./SendMessageModal";
 
 const {TabPane} = Tabs;
 
@@ -44,6 +46,18 @@ class TopicInfo extends Component {
         })
     }
 
+    handleSendMessage = async (values) => {
+        let offset = await request.post(`/topics/${this.state.topic}/data?clusterId=${this.state.clusterId}`, values);
+        notification['success']({
+            message: '提示',
+            description: `发送数据成功，位于 offset ${offset}。`,
+        });
+        this.setState({
+            modalVisible: false
+        });
+        return true;
+    }
+
     render() {
 
         return (
@@ -54,24 +68,29 @@ class TopicInfo extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        subTitle={<FormattedMessage id="topic-detail" />}
+                        subTitle={<FormattedMessage id="topic-detail"/>}
                         title={this.state.topic}
                         extra={[
                             <Button key="2" onClick={() => {
-                                message.warn('Not yet implemented.');
-                            }}><FormattedMessage id="produce-message" /></Button>,
+                                this.setState({
+                                    modalVisible: true
+                                })
+                            }}><FormattedMessage id="produce-message"/></Button>,
                             <Link to={`/topic-data?clusterId=${this.state.clusterId}&topic=${this.state.topic}`}>
-                                <Button key="1" type="primary">
-                                    <FormattedMessage id="consume-message" />
+                                <Button key="btn-consume-message" type="primary">
+                                    <FormattedMessage id="consume-message"/>
                                 </Button>
                             </Link>,
                         ]}
                     >
                         <Row>
                             <Space size='large'>
-                                <Statistic title={<FormattedMessage id="numPartitions" />} value={this.state.topicInfo['partitions'].length}/>
-                                <Statistic title={<FormattedMessage id="replicationFactor" />} value={this.state.topicInfo['replicaCount']}/>
-                                <Statistic title={<FormattedMessage id="log-size" />} value={renderSize(this.state.topicInfo['totalLogSize'])}/>
+                                <Statistic title={<FormattedMessage id="numPartitions"/>}
+                                           value={this.state.topicInfo['partitions'].length}/>
+                                <Statistic title={<FormattedMessage id="replicationFactor"/>}
+                                           value={this.state.topicInfo['replicaCount']}/>
+                                <Statistic title={<FormattedMessage id="log-size"/>}
+                                           value={renderSize(this.state.topicInfo['totalLogSize'])}/>
                             </Space>
                         </Row>
                     </PageHeader>
@@ -79,27 +98,27 @@ class TopicInfo extends Component {
 
                 <div className='kd-content'>
                     <Tabs defaultActiveKey='0' onChange={this.handleTabChange}>
-                        <TabPane tab={<FormattedMessage id="partitions" />} key="partition">
+                        <TabPane tab={<FormattedMessage id="partitions"/>} key="partition">
                             <TopicPartition
                                 clusterId={this.state.clusterId}
                                 topic={this.state.topic}>}
                             </TopicPartition>
                         </TabPane>
-                        <TabPane tab={<FormattedMessage id="brokers" />} key="broker">
+                        <TabPane tab={<FormattedMessage id="brokers"/>} key="broker">
                             <TopicBroker
                                 clusterId={this.state.clusterId}
                                 topic={this.state.topic}>
 
                             </TopicBroker>
                         </TabPane>
-                        <TabPane tab={<FormattedMessage id="consumer-groups" />} key="consumer-group">
+                        <TabPane tab={<FormattedMessage id="consumer-groups"/>} key="consumer-group">
                             <TopicConsumerGroup
                                 clusterId={this.state.clusterId}
                                 topic={this.state.topic}>
 
                             </TopicConsumerGroup>
                         </TabPane>
-                        <TabPane tab={<FormattedMessage id="topic-config" />} key="topic-config">
+                        <TabPane tab={<FormattedMessage id="topic-config"/>} key="topic-config">
                             <TopicConfig
                                 clusterId={this.state.clusterId}
                                 topic={this.state.topic}>
@@ -108,6 +127,20 @@ class TopicInfo extends Component {
                         </TabPane>
                     </Tabs>
                 </div>
+
+                {
+                    this.state.modalVisible ?
+                        <SendMessageModal
+                            partitions={this.state.topicInfo.partitions}
+                            handleOk={this.handleSendMessage}
+                            handleCancel={() => {
+                                this.setState({
+                                    modalVisible: false
+                                })
+                            }}
+                            confirmLoading={this.state.modalConfirmLoading}
+                        /> : undefined
+                }
             </div>
         );
     }

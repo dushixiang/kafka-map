@@ -1,8 +1,14 @@
 package cn.typesafe.km.service;
 
+import cn.typesafe.km.entity.Cluster;
 import cn.typesafe.km.service.dto.ConsumerMessage;
+import cn.typesafe.km.service.dto.TopicData;
+import lombok.SneakyThrows;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -50,17 +56,17 @@ public class MessageService {
                 if (!CollectionUtils.isEmpty(polled)) {
 
                     for (ConsumerRecord<String, String> consumerRecord : polled) {
-                        if(StringUtils.hasText(keyFilter)){
+                        if (StringUtils.hasText(keyFilter)) {
                             String key = consumerRecord.key();
-                            if(StringUtils.hasText(key) && key.toLowerCase().contains(keyFilter.toLowerCase())) {
+                            if (StringUtils.hasText(key) && key.toLowerCase().contains(keyFilter.toLowerCase())) {
                                 records.add(consumerRecord);
                             }
                             continue;
                         }
 
-                        if(StringUtils.hasText(valueFilter)){
+                        if (StringUtils.hasText(valueFilter)) {
                             String value = consumerRecord.value();
-                            if(StringUtils.hasText(value) && value.toLowerCase().contains(valueFilter.toLowerCase())) {
+                            if (StringUtils.hasText(value) && value.toLowerCase().contains(valueFilter.toLowerCase())) {
                                 records.add(consumerRecord);
                             }
                             continue;
@@ -95,5 +101,14 @@ public class MessageService {
                         return consumerMessage;
                     }).collect(Collectors.toList());
         }
+    }
+
+    @SneakyThrows
+    public long sendData(String clusterId, String topic, TopicData topicData) {
+        Cluster cluster = clusterService.findById(clusterId);
+        KafkaProducer<String, String> kafkaProducer = clusterService.createProducer(cluster.getServers());
+        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic,topicData.getPartition(), topicData.getKey(), topicData.getValue());
+        RecordMetadata recordMetadata = kafkaProducer.send(producerRecord).get();
+        return recordMetadata.offset();
     }
 }

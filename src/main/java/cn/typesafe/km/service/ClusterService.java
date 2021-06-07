@@ -9,7 +9,10 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +65,12 @@ public class ClusterService {
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         return new KafkaConsumer<>(properties, new StringDeserializer(), new StringDeserializer());
+    }
+
+    public KafkaProducer<String,String> createProducer(String servers){
+        Properties properties = new Properties();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
+        return new KafkaProducer<>(properties, new StringSerializer(), new StringSerializer());
     }
 
     public AdminClient getAdminClient(String id, String servers) {
