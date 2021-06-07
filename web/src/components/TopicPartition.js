@@ -41,8 +41,8 @@ class TopicPartition extends Component {
             defaultSortOrder: 'ascend',
             render: (leader, record, index) => {
 
-                return <Tooltip title={leader['host'] + ":" + leader['port']}>
-                    <Button size='small'>{leader['id']}</Button>
+                return <Tooltip key={'leader-' + leader['host']} title={leader['host'] + ":" + leader['port']}>
+                    <Button key={leader['host']} size='small'>{leader['id']}</Button>
                 </Tooltip>
             }
         }, {
@@ -78,7 +78,8 @@ class TopicPartition extends Component {
                         if (item['logSize'] > 0) {
                             logSize = renderSize(item['logSize']);
                         }
-                        return <Tooltip title={item['host'] + ":" + item['port'] + ' ' + logSize}>
+                        return <Tooltip key={'replicas-' + item['host']}
+                                        title={item['host'] + ":" + item['port'] + ' ' + logSize}>
                             <Button size='small'>{item['id']}</Button>
                         </Tooltip>
                     })}
@@ -91,7 +92,8 @@ class TopicPartition extends Component {
             render: (isr, record, index) => {
                 return <Space>
                     {isr.map(item => {
-                        return <Tooltip title={item['host'] + ":" + item['port']}>
+                        return <Tooltip key={'isr-' + item['host']}
+                                        title={item['host'] + ":" + item['port']}>
                             <Button size='small'>{item['id']}</Button>
                         </Tooltip>
                     })}
@@ -109,7 +111,7 @@ class TopicPartition extends Component {
         return (
             <div>
                 <Table
-                    rowKey='id'
+                    rowKey='partition'
                     dataSource={this.state.items}
                     columns={columns}
                     position={'both'}

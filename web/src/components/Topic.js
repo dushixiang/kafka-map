@@ -84,9 +84,6 @@ class Topic extends Component {
         } catch (e) {
             console.log(e);
         } finally {
-            items = items.map(item => {
-                return {'key': item['id'], ...item}
-            })
             this.setState({
                 items: items,
                 queryParams: queryParams,
@@ -314,7 +311,7 @@ class Topic extends Component {
                     </div>
 
                     <Table
-                        rowKey='id'
+                        rowKey='name'
                         dataSource={this.state.items}
                         columns={columns}
                         position={'both'}

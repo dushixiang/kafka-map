@@ -74,9 +74,6 @@ class ConsumerGroup extends Component {
         } catch (e) {
             console.log(e);
         } finally {
-            items = items.map(item => {
-                return {'key': item['id'], ...item}
-            })
             this.setState({
                 items: items,
                 queryParams: queryParams,
@@ -111,14 +108,14 @@ class ConsumerGroup extends Component {
     render() {
 
         const columns = [{
-                title: <FormattedMessage id="index" />,
+                title: <FormattedMessage id="index"/>,
                 dataIndex: 'id',
                 key: 'id',
                 render: (id, record, index) => {
                     return index + 1;
                 }
             }, {
-                title: <FormattedMessage id="name" />,
+                title: <FormattedMessage id="name"/>,
                 dataIndex: 'groupId',
                 key: 'groupId',
                 defaultSortOrder: 'ascend',
@@ -130,7 +127,7 @@ class ConsumerGroup extends Component {
                     </Link>
                 }
             }, {
-                title: <FormattedMessage id="topic-count" />,
+                title: <FormattedMessage id="topic-count"/>,
                 dataIndex: 'topicCount',
                 key: 'topicCount',
                 sorter: (a, b) => a['topics'].length - b['topics'].length,
@@ -142,24 +139,25 @@ class ConsumerGroup extends Component {
                             to={`/topic-info?clusterId=${this.state.clusterId}&topic=${item}`}>{item}</Link></List.Item>}
                     />
 
-                    return <Popover content={content} title={<FormattedMessage id="topic-list" />}>
+                    return <Popover content={content} title={<FormattedMessage id="topic-list"/>}>
                         <Button type="link" size='small'>{record['topics'].length}</Button>
                     </Popover>
                 }
 
             },
                 {
-                    title: <FormattedMessage id="operate" />,
+                    title: <FormattedMessage id="operate"/>,
                     key: 'action',
                     render: (text, record, index) => {
                         return (
                             <div>
                                 <Popconfirm
-                                    title={<FormattedMessage id="delete-confirm" />}
+                                    title={<FormattedMessage id="delete-confirm"/>}
                                     onConfirm={() => this.delete(record['groupId'], index)}
                                 >
                                     <Button type="text" size='small' danger
-                                            loading={this.state.items[index]['deleting']}><FormattedMessage id="delete" /></Button>
+                                            loading={this.state.items[index]['deleting']}><FormattedMessage
+                                        id="delete"/></Button>
                                 </Popconfirm>
 
 
@@ -178,7 +176,7 @@ class ConsumerGroup extends Component {
                         onBack={() => {
                             this.props.history.goBack();
                         }}
-                        subTitle={<FormattedMessage id="consumer-group-management" />}
+                        subTitle={<FormattedMessage id="consumer-group-management"/>}
                         title={this.state.clusterName}
                     />
                 </div>
@@ -197,7 +195,7 @@ class ConsumerGroup extends Component {
                                         allowClear
                                         onSearch={this.handleSearchByName}
                                     />
-                                    <Tooltip title={<FormattedMessage id="reset" />}>
+                                    <Tooltip title={<FormattedMessage id="reset"/>}>
 
                                         <Button icon={<UndoOutlined/>} onClick={() => {
                                             this.inputRefOfName.current.setValue('');
@@ -214,7 +212,7 @@ class ConsumerGroup extends Component {
 
                                     <Divider type="vertical"/>
 
-                                    <Tooltip title={<FormattedMessage id="refresh" />}>
+                                    <Tooltip title={<FormattedMessage id="refresh"/>}>
                                         <Button icon={<SyncOutlined/>} onClick={() => {
                                             this.loadTableData(this.state.queryParams)
                                         }}>
@@ -227,7 +225,7 @@ class ConsumerGroup extends Component {
                     </div>
 
                     <Table
-                        rowKey='id'
+                        rowKey='groupId'
                         dataSource={this.state.items}
                         columns={columns}
                         position={'both'}

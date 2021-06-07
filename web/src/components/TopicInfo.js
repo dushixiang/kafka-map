@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, PageHeader, Statistic, Tabs, Row, Space, message, notification} from "antd";
+import {Button, PageHeader, Statistic, Tabs, Row, Space, notification} from "antd";
 import TopicPartition from "./TopicPartition";
 import TopicBroker from "./TopicBroker";
 import TopicConsumerGroup from "./TopicConsumerGroup";
@@ -8,7 +8,6 @@ import request from "../common/request";
 import {renderSize} from "../utils/utils";
 import TopicConfig from "./TopicConfig";
 import {FormattedMessage} from "react-intl";
-import ClusterModal from "./ClusterModal";
 import SendMessageModal from "./SendMessageModal";
 
 const {TabPane} = Tabs;
@@ -71,12 +70,12 @@ class TopicInfo extends Component {
                         subTitle={<FormattedMessage id="topic-detail"/>}
                         title={this.state.topic}
                         extra={[
-                            <Button key="2" onClick={() => {
+                            <Button key="btn-1" onClick={() => {
                                 this.setState({
                                     modalVisible: true
                                 })
                             }}><FormattedMessage id="produce-message"/></Button>,
-                            <Link to={`/topic-data?clusterId=${this.state.clusterId}&topic=${this.state.topic}`}>
+                            <Link key={'link-2'} to={`/topic-data?clusterId=${this.state.clusterId}&topic=${this.state.topic}`}>
                                 <Button key="btn-consume-message" type="primary">
                                     <FormattedMessage id="consume-message"/>
                                 </Button>
