@@ -260,6 +260,8 @@ class TopicData extends Component {
                                 <Space>
                                     <Text code>partition:</Text>
                                     <Text>{item['partition']}</Text>
+                                    <Text code>key:</Text>
+                                    <Text>{item['key']}</Text>
                                     <Text code>offset:</Text>
                                     <Text>{item['offset']}</Text>
                                     <Text code>timestamp:</Text>:

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import 'antd/dist/antd.css';
 import './App.css';
-import {Button, ConfigProvider, Dropdown, Layout, Menu, Tooltip, Typography} from 'antd';
+import {Button, ConfigProvider, Dropdown, Layout, Menu, Tooltip} from 'antd';
 import {Link, Route, Switch} from 'react-router-dom';
 import Cluster from "./components/Cluster";
 import Topic from "./components/Topic";

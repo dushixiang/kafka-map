@@ -1,17 +1,15 @@
 import React, {Component} from 'react';
-import {Button, Card, Checkbox, Form, Input, Modal, Typography} from "antd";
+import {Button, Card, Form, Input, Typography} from "antd";
 import './Login.css'
 import request from "../common/request";
-import {message} from "antd/es";
 import {withRouter} from "react-router-dom";
-import {LockOutlined, OneToOneOutlined, UserOutlined} from '@ant-design/icons';
+import {LockOutlined, UserOutlined} from '@ant-design/icons';
 
 const {Title} = Typography;
 
 class LoginForm extends Component {
 
     formRef = React.createRef();
-    totpInputRef = React.createRef();
 
     state = {
         inLogin: false,
