@@ -1,22 +1,21 @@
 # kafka map
 
-给编程插上翅膀，给kafka装上导航。
+给编程插上翅膀，给`kafka`装上导航。
 
 ## 快速了解
 
-`kafka map`是使用`Java11`和`React`给`Apache Kafka`开发的一款web ui工具。
-通过这款工具可以很方便直观的查看Broker、 topics、 partitions、consumers等信息，以及查看Topic中的消息。
+`kafka map`是使用`Java11`和`React`开发的一款`kafka`可视化工具。
 
 目前支持的功能有：
 
 - 多集群管理
-- topic监控 —— 查看分区数量、副本数量、存储大小、offset
-- topic管理 —— 创建、删除、扩容
-- broker查看 —— Partitions as Leader、	Partitions as Follower
-- consumer管理（查看、删除）
+- 集群状态监控（分区数量、副本数量、存储大小、offset）
+- 主题创建、删除、扩容（删除需配置delete.topic.enable = true）
+- broker状态监控
+- 消费者组查看、删除
 - 重置offset
-- 消费消息 —— 支持String和json方式展示
-- 生产消息 —— 支持向指定的topic和partition发送字符串消息
+- 消息查询（支持String和json方式展示）
+- 发送消息（支持向指定的topic和partition发送字符串消息）
 
 ## 截图
 
