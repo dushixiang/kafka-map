@@ -1,8 +1,10 @@
 package cn.typesafe.km.controller;
 
 import cn.typesafe.km.controller.dto.LoginAccount;
+import cn.typesafe.km.controller.dto.PasswordChange;
 import cn.typesafe.km.entity.User;
 import cn.typesafe.km.service.UserService;
+import cn.typesafe.km.util.Web;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,14 +33,21 @@ public class AccountController {
     }
 
     @PostMapping("/logout")
-    public void logout(HttpServletRequest request) {
-        String token = request.getHeader("X-Auth-Token");
+    public void logout() {
+        String token = Web.getToken();
         userService.logout(token);
     }
 
     @GetMapping("/info")
-    public User info(HttpServletRequest request) {
-        String token = request.getHeader("X-Auth-Token");
+    public User info() {
+        String token = Web.getToken();
         return userService.info(token);
+    }
+
+    @PostMapping("/change-password")
+    public void changePassword(@RequestBody PasswordChange passwordChange) {
+        String token = Web.getToken();
+        userService.changePassword(token, passwordChange);
+        userService.logout(token);
     }
 }

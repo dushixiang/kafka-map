@@ -19,8 +19,8 @@ public class Networks {
     public static boolean isHostConnected(String host, int port) {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), 3000);
-            InetAddress localAddress = socket.getLocalAddress();
-            String hostName = localAddress.getHostName();
+//            InetAddress localAddress = socket.getLocalAddress();
+//            String hostName = localAddress.getHostName();
             return true;
         } catch (Exception e) {
             return false;

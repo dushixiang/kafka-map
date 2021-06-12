@@ -32,6 +32,14 @@
 
 ## docker方式安装
 
+```shell
+docker run -d \
+    -p 8080:8080 \
+    -v /opt/kafka-map/data:/usr/local/kafka-map/data \
+    --name kafka-map \
+    --restart always dushixiang/kafka-map:latest
+```
+
 ## 快速安装
 
 下载

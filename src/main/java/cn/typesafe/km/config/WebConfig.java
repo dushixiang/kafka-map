@@ -41,7 +41,7 @@ public class WebConfig {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
                 registry.addInterceptor(authInterceptor)
-                        .addPathPatterns("/info", "/brokers/**", "/clusters/**", "/consumerGroups/**", "/topics/**");
+                        .addPathPatterns("/info", "change-password", "/brokers/**", "/clusters/**", "/consumerGroups/**", "/topics/**");
             }
         };
     }

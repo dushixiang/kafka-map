@@ -24,6 +24,7 @@ import request from "./common/request";
 import {
     GithubOutlined
 } from '@ant-design/icons';
+import Info from "./components/Info";
 
 const {Header, Content, Footer} = Layout;
 
@@ -103,6 +104,11 @@ class App extends Component {
         const infoMenu = (
             <Menu>
                 <Menu.Item>
+                    <Link to={`/info`}>
+                        修改密码
+                    </Link>
+                </Menu.Item>
+                <Menu.Item>
                     <a rel="noopener noreferrer" href="#" onClick={() => {
                         this.logout();
                     }}>
@@ -176,6 +182,7 @@ class App extends Component {
                                                 <Route path="/consumer-group-info" component={ConsumerGroupInfo}/>
                                                 <Route path="/topic-info" component={TopicInfo}/>
                                                 <Route path="/topic-data" component={TopicData}/>
+                                                <Route path="/info" component={Info}/>
                                             </Content>
                                         </Layout>
                                     </Content>
