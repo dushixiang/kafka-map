@@ -1,6 +1,7 @@
 package cn.typesafe.km;
 
 import cn.typesafe.km.service.UserService;
+import lombok.SneakyThrows;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,7 +17,16 @@ import java.nio.file.Paths;
 public class KafkaMapApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
+        initDatabaseDir();
         SpringApplication.run(KafkaMapApplication.class, args);
+    }
+
+    @SneakyThrows
+    public static void initDatabaseDir(){
+        Path dbPath = Paths.get("data");
+        if (!Files.exists(dbPath)) {
+            Files.createDirectory(dbPath);
+        }
     }
 
     @Resource
@@ -24,10 +34,6 @@ public class KafkaMapApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Path dbPath = Paths.get("data");
-        if (!Files.exists(dbPath)) {
-            Files.createDirectory(dbPath);
-        }
         userService.initUser();
     }
 }

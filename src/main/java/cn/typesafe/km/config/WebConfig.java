@@ -1,13 +1,18 @@
 package cn.typesafe.km.config;
 
 import cn.typesafe.km.interceptor.AuthInterceptor;
+import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * @author dushixiang
@@ -36,7 +41,7 @@ public class WebConfig {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
                 registry.addInterceptor(authInterceptor)
-                        .addPathPatterns("/brokers/**", "/clusters/**", "/consumerGroups/**", "/topics/**");
+                        .addPathPatterns("/info", "/brokers/**", "/clusters/**", "/consumerGroups/**", "/topics/**");
             }
         };
     }

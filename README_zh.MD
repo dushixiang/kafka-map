@@ -4,7 +4,7 @@
 
 ## 快速了解
 
-`kafka map`是使用`Java8`和`React`给`Apache Kafka`开发的一款web ui工具。
+`kafka map`是使用`Java11`和`React`给`Apache Kafka`开发的一款web ui工具。
 通过这款工具可以很方便直观的查看Broker、 topics、 partitions、consumers等信息，以及查看Topic中的消息。
 
 目前支持的功能有：
@@ -27,9 +27,10 @@
 
 ## 依赖环境
 
-- Java8 或更高版本
+- Java11 或更高版本
 - Apache Kafka 1.1.0 或更高版本
 
+## docker方式安装
 
 ## 快速安装
 

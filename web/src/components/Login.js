@@ -39,8 +39,6 @@ class LoginForm extends Component {
             localStorage.setItem('X-Auth-Token', result['token']);
             // this.props.history.push();
             window.location.href = "/"
-        } catch (e) {
-            message.error(e.message);
         } finally {
             this.setState({
                 inLogin: false
@@ -63,9 +61,9 @@ class LoginForm extends Component {
                         <Form.Item name='password' rules={[{required: true, message: '请输入登录密码！'}]}>
                             <Input.Password prefix={<LockOutlined/>} placeholder="登录密码"/>
                         </Form.Item>
-                        <Form.Item name='remember' valuePropName='checked' initialValue={false}>
-                            <Checkbox>记住登录</Checkbox>
-                        </Form.Item>
+                        {/*<Form.Item name='remember' valuePropName='checked' initialValue={false}>*/}
+                        {/*    <Checkbox>记住登录</Checkbox>*/}
+                        {/*</Form.Item>*/}
                         <Form.Item>
                             <Button type="primary" htmlType="submit" className="login-form-button"
                                     loading={this.state.inLogin}>

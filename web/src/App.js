@@ -92,7 +92,7 @@ class App extends Component {
                 </Menu.Item>
                 <Menu.Item>
                     <a rel="noopener noreferrer" href="#" onClick={() => {
-                        this.setLocale('zh-cn');
+                        this.setLocale('en-us');
                     }}>
                         English
                     </a>
