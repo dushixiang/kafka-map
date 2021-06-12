@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import 'antd/dist/antd.css';
 import './App.css';
-import {ConfigProvider, Dropdown, Layout, Menu} from 'antd';
+import {Button, ConfigProvider, Dropdown, Layout, Menu, Tooltip, Typography} from 'antd';
 import {Link, Route, Switch} from 'react-router-dom';
 import Cluster from "./components/Cluster";
 import Topic from "./components/Topic";
@@ -18,7 +18,12 @@ import en_US from './locales/en_US';
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import 'dayjs/locale/zh-cn';
-import { IntlProvider } from 'react-intl';
+import {IntlProvider} from 'react-intl';
+import Login from "./components/Login";
+import request from "./common/request";
+import {
+    GithubOutlined
+} from '@ant-design/icons';
 
 const {Header, Content, Footer} = Layout;
 
@@ -28,7 +33,10 @@ class App extends Component {
 
     state = {
         package: NT_PACKAGE(),
-        locale: 'en-us'
+        locale: 'en-us',
+        info: {
+            username: ''
+        }
     }
 
     componentDidMount() {
@@ -40,6 +48,7 @@ class App extends Component {
         this.setState({
             locale: locale
         })
+        this.loadUserInfo();
     }
 
     setLocale = (locale) => {
@@ -58,6 +67,18 @@ class App extends Component {
         }
     }
 
+    loadUserInfo = async () => {
+        let info = await request.get('/info');
+        this.setState({
+            info: info
+        })
+    }
+
+    logout = async () => {
+        await request.post('/logout');
+        window.location.reload();
+    }
+
     render() {
 
         const menu = (
@@ -71,9 +92,21 @@ class App extends Component {
                 </Menu.Item>
                 <Menu.Item>
                     <a rel="noopener noreferrer" href="#" onClick={() => {
-                        this.setLocale('en-us');
+                        this.setLocale('zh-cn');
                     }}>
                         English
+                    </a>
+                </Menu.Item>
+            </Menu>
+        );
+
+        const infoMenu = (
+            <Menu>
+                <Menu.Item>
+                    <a rel="noopener noreferrer" href="#" onClick={() => {
+                        this.logout();
+                    }}>
+                        退出登录
                     </a>
                 </Menu.Item>
             </Menu>
@@ -88,6 +121,7 @@ class App extends Component {
                 <ConfigProvider locale={this.getAntDesignLocale(this.state.locale)}>
                     <div className="App">
                         <Switch>
+                            <Route path="/login" component={Login}/>
                             <Route>
                                 <Layout style={{minHeight: '100vh'}}>
                                     <Header className="header">
@@ -98,19 +132,37 @@ class App extends Component {
                                                 </Link>
                                             </div>
                                             <div className='km-header-right'>
+                                                <Dropdown overlay={infoMenu}>
+                                                <span className={'km-header-right-item'}>
+                                                    {this.state.info.username}
+                                                </span>
+                                                </Dropdown>
+                                            </div>
+                                            <div className='km-header-right'>
                                                 <Dropdown overlay={menu}>
                                                 <span className={'km-header-right-item'}>
-                                                <i className="anticon">
-                                                    <svg viewBox="0 0 24 24" focusable="false" width="1em" height="1em"
-                                                         fill="currentColor" aria-hidden="true">
-                                                        <path d="M0 0h24v24H0z" fill="none"/>
-                                                        <path
-                                                            d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z "
-                                                            className="css-c4d79v"/>
-                                                    </svg>
-                                                </i>
-                                            </span>
+                                                    <i className="anticon">
+                                                        <svg viewBox="0 0 24 24" focusable="false" width="1em"
+                                                             height="1em"
+                                                             fill="currentColor" aria-hidden="true">
+                                                            <path d="M0 0h24v24H0z" fill="none"/>
+                                                            <path
+                                                                d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z "
+                                                                className="css-c4d79v"/>
+                                                        </svg>
+                                                    </i>
+                                                </span>
                                                 </Dropdown>
+                                            </div>
+
+                                            <div className='km-header-right'>
+                                                <span className={'km-header-right-item'}>
+                                                    <Tooltip title="star">
+                                                        <Button type="text" style={{color: 'white'}} href='https://github.com/dushixiang/kafka-map' icon={<GithubOutlined/>}>
+
+                                                        </Button>
+                                                      </Tooltip>
+                                                </span>
                                             </div>
                                         </div>
                                     </Header>

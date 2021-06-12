@@ -18,7 +18,9 @@ public class Cluster {
     @Column(length = 36)
     @Id
     private String id;
+    @Column(length = 200)
     private String name;
+    @Column(length = 500)
     private String servers;
     private String controller;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

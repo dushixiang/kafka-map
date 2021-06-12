@@ -1,9 +1,13 @@
 package cn.typesafe.km.config;
 
+import cn.typesafe.km.interceptor.AuthInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.annotation.Resource;
 
 /**
  * @author dushixiang
@@ -11,6 +15,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebConfig {
+
+    @Resource
+    private AuthInterceptor authInterceptor;
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -21,9 +28,15 @@ public class WebConfig {
                 registry.addMapping("/**")
                         .allowedOrigins("*")
                         .allowCredentials(false)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTION")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .exposedHeaders("*");
+            }
+
+            @Override
+            public void addInterceptors(InterceptorRegistry registry) {
+                registry.addInterceptor(authInterceptor)
+                        .addPathPatterns("/brokers/**", "/clusters/**", "/consumerGroups/**", "/topics/**");
             }
         };
     }

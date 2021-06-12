@@ -8,3 +8,7 @@ spring:
     show-sql: true
 server:
   port: 8080
+
+default:
+  username: admin
+  password: admin

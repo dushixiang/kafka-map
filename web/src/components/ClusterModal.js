@@ -48,13 +48,14 @@ const ClusterModal = ({title, handleOk, handleCancel, confirmLoading, model}) =>
                 </Form.Item>
 
                 <Form.Item label={<FormattedMessage id="name" />} name='name' rules={[{required: true, message: 'Please enter name'}]}>
-                    <Input placeholder=""/>
+                    <Input placeholder="" maxLength={200}/>
                 </Form.Item>
 
                 {
                     model['id'] === undefined ?
                         <Form.Item label={<FormattedMessage id="servers" />} name='servers' rules={[{required: true, message: 'Please enter broker servers'}]}>
                             <TextArea rows={4}
+                                      maxLength={500}
                                       placeholder="172.18.0.1:9092,172.18.0.2:9092,172.18.0.3:9092"/>
                         </Form.Item> : undefined
                 }

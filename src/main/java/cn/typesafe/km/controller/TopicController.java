@@ -3,9 +3,8 @@ package cn.typesafe.km.controller;
 import cn.typesafe.km.service.BrokerService;
 import cn.typesafe.km.service.ConsumerGroupService;
 import cn.typesafe.km.service.MessageService;
-import cn.typesafe.km.service.dto.*;
 import cn.typesafe.km.service.TopicService;
-import org.apache.kafka.clients.producer.RecordMetadata;
+import cn.typesafe.km.service.dto.*;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
