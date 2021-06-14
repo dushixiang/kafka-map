@@ -43,13 +43,13 @@
 docker run -d \
     -p 8080:8080 \
     -v /opt/kafka-map/data:/usr/local/kafka-map/data \
-    -e DEFAULT_USERNAME=admin
-    -e DEFAULT_PASSWORD=admin
+    -e DEFAULT_USERNAME=admin \
+    -e DEFAULT_PASSWORD=admin \
     --name kafka-map \
     --restart always dushixiang/kafka-map:latest
 ```
 
-## 快速安装
+## 原生方式安装
 
 下载
 ```shell
