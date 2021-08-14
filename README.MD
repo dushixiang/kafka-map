@@ -16,6 +16,7 @@
 - 重置offset
 - 消息查询（支持String和json方式展示）
 - 发送消息（支持向指定的topic和partition发送字符串消息）
+- 延迟消息（通过扩展使kafka支持18个级别的延迟消息）
 
 ## 截图
 
@@ -70,6 +71,10 @@
 ### 消费消息
 
 ![消费消息](./screenshot/consumer-message.png)
+
+### 延迟消息
+
+![延迟消息](./screenshot/delay-message.png)
 
 ## 协议与条款
 
