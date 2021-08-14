@@ -22,6 +22,8 @@ public class Cluster {
     private String name;
     @Column(length = 500)
     private String servers;
+    @Column(length = 20)
+    private String delayMessageStatus;
     private String controller;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date created;

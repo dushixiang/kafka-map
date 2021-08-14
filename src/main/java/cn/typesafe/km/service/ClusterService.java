@@ -1,10 +1,12 @@
 package cn.typesafe.km.service;
 
 import cn.typesafe.km.config.Constant;
+import cn.typesafe.km.delay.DelayMessageHelper;
 import cn.typesafe.km.entity.Cluster;
 import cn.typesafe.km.repository.ClusterRepository;
 import cn.typesafe.km.util.ID;
 import cn.typesafe.km.util.Networks;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -25,6 +27,7 @@ import java.util.concurrent.ExecutionException;
  * @author dushixiang
  * @date 2021/3/27 11:16 上午
  */
+@Slf4j
 @Service
 public class ClusterService {
 
@@ -38,6 +41,8 @@ public class ClusterService {
     private BrokerService brokerService;
     @Resource
     private ConsumerGroupService consumerGroupService;
+
+    private final ConcurrentHashMap<String, DelayMessageHelper> store = new ConcurrentHashMap<>();
 
     public Cluster findById(String id) {
         return clusterRepository.findById(id).orElseThrow(() -> new NoSuchElementException("cluster 「" + id + "」does not exist"));
@@ -53,21 +58,21 @@ public class ClusterService {
 
     public KafkaConsumer<String, String> createConsumer(String clusterId) {
         Cluster cluster = findById(clusterId);
-        return createConsumer(cluster.getServers(), Constant.CONSUMER_GROUP_ID);
+        return createConsumer(cluster.getServers(), Constant.CONSUMER_GROUP_ID, "earliest");
     }
 
-    public KafkaConsumer<String, String> createConsumer(String servers, String groupId) {
+    public KafkaConsumer<String, String> createConsumer(String servers, String groupId, String autoOffsetResetConfig) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "100");
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetResetConfig);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         return new KafkaConsumer<>(properties, new StringDeserializer(), new StringDeserializer());
     }
 
-    public KafkaProducer<String,String> createProducer(String servers){
+    public KafkaProducer<String, String> createProducer(String servers) {
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         return new KafkaProducer<>(properties, new StringSerializer(), new StringSerializer());
@@ -114,7 +119,6 @@ public class ClusterService {
         }
 
         AdminClient adminClient = getAdminClient(uuid, cluster.getServers());
-        String clusterId = adminClient.describeCluster().clusterId().get();
         String controller = adminClient.describeCluster().controller().get().host();
 
         cluster.setId(uuid);
@@ -146,5 +150,49 @@ public class ClusterService {
         cluster.setBrokerCount(brokerService.countBroker(cluster.getId()));
         cluster.setConsumerCount(consumerGroupService.countConsumerGroup(cluster.getId()));
         return cluster;
+    }
+
+    @Transactional
+    public void enableDelayMessage(String id) {
+        Cluster cluster = findById(id);
+        if (Constant.DELAY_MESSAGE_ENABLED.equals(cluster.getDelayMessageStatus())) {
+            return;
+        }
+        DelayMessageHelper delayMessageHelper = store.getOrDefault(id, new DelayMessageHelper(cluster.getServers(), Constant.CONSUMER_GROUP_ID));
+        store.put(id, delayMessageHelper);
+        delayMessageHelper.start();
+        cluster.setDelayMessageStatus(Constant.DELAY_MESSAGE_ENABLED);
+        clusterRepository.saveAndFlush(cluster);
+    }
+
+    @Transactional
+    public void disableDelayMessage(String id) {
+        Cluster cluster = findById(id);
+        if (Constant.DELAY_MESSAGE_DISABLED.equals(cluster.getDelayMessageStatus())) {
+            return;
+        }
+        DelayMessageHelper delayMessageHelper = store.getOrDefault(id, new DelayMessageHelper(cluster.getServers(), Constant.CONSUMER_GROUP_ID));
+        store.put(id, delayMessageHelper);
+        delayMessageHelper.stop();
+        cluster.setDelayMessageStatus(Constant.DELAY_MESSAGE_DISABLED);
+        clusterRepository.saveAndFlush(cluster);
+    }
+
+    public void restore() {
+        List<Cluster> clusters = clusterRepository.findAll();
+        for (Cluster cluster : clusters) {
+            if (Constant.DELAY_MESSAGE_ENABLED.equals(cluster.getDelayMessageStatus())) {
+                try {
+                    String clusterId = cluster.getId();
+                    DelayMessageHelper delayMessageHelper = store.getOrDefault(clusterId, new DelayMessageHelper(cluster.getServers(), Constant.CONSUMER_GROUP_ID));
+                    store.put(clusterId, delayMessageHelper);
+                    delayMessageHelper.start();
+                } catch (Exception e) {
+                    log.error("恢复延迟消息失败，集群名称: {}，集群地址: {}", cluster.getName(), cluster.getServers(), e);
+                    this.disableDelayMessage(cluster.getId());
+                }
+            }
+
+        }
     }
 }

@@ -53,6 +53,7 @@ const zh_CN = {
     'produce-message': '导入数据',
     'pull': '拉取',
     'newest': '最新',
+    'delay-message': '延迟消息',
 }
 
 export default zh_CN;

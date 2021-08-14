@@ -71,4 +71,14 @@ public class ClusterController {
     public void updateName(@PathVariable String clusterId, @RequestBody Cluster cluster) {
         clusterService.updateNameById(clusterId, cluster.getName());
     }
+
+    @PostMapping("/{clusterId}/enableDelayMessage")
+    public void enableDelayMessage(@PathVariable String clusterId) {
+        clusterService.enableDelayMessage(clusterId);
+    }
+
+    @PostMapping("/{clusterId}/disableDelayMessage")
+    public void disableDelayMessage(@PathVariable String clusterId) {
+        clusterService.disableDelayMessage(clusterId);
+    }
 }

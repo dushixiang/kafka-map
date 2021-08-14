@@ -1,5 +1,19 @@
 import React, {Component} from 'react';
-import {Button, message, Table, Tooltip, Modal, Row, Col, Typography, Space, Input, Divider, Popconfirm} from "antd";
+import {
+    Button,
+    message,
+    Table,
+    Tooltip,
+    Modal,
+    Row,
+    Col,
+    Typography,
+    Space,
+    Input,
+    Divider,
+    Popconfirm,
+    Switch, Popover
+} from "antd";
 import dayjs from "dayjs";
 import request from "../common/request";
 import qs from "qs";
@@ -17,6 +31,21 @@ import {FormattedMessage} from "react-intl";
 const confirm = Modal.confirm;
 const {Search} = Input;
 const {Title, Text} = Typography;
+
+const content = (
+    <div>
+        <p>基于kafka的延迟消息服务，支持18个级别，1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h。</p>
+        <p>向主题：delay-message 投递以下格式的消息即可，level 范围:0-17 。</p>
+        <pre>
+            {JSON.stringify({
+                "level": 0,
+                "topic": "target",
+                "key": "key",
+                "value": "value"
+            }, null,4)}
+        </pre>
+    </div>
+);
 
 class Cluster extends Component {
 
@@ -192,7 +221,7 @@ class Cluster extends Component {
                 })
                 await this.loadTableData(this.state.queryParams);
             } else {
-                message.error(+ result.message, 10);
+                message.error(+result.message, 10);
             }
         } finally {
             this.setState({
@@ -204,14 +233,14 @@ class Cluster extends Component {
     render() {
 
         const columns = [{
-            title: <FormattedMessage id="index" />,
+            title: <FormattedMessage id="index"/>,
             dataIndex: 'id',
             key: 'id',
             render: (id, record, index) => {
                 return index + 1;
             }
         }, {
-            title: <FormattedMessage id="name" />,
+            title: <FormattedMessage id="name"/>,
             dataIndex: 'name',
             key: 'name',
             render: (name, record) => {
@@ -227,11 +256,30 @@ class Cluster extends Component {
             },
             sorter: true,
         }, {
-            title: <FormattedMessage id="servers" />,
+            title: <FormattedMessage id="servers"/>,
             dataIndex: 'servers',
             key: 'servers',
         }, {
-            title: <FormattedMessage id="topic" />,
+            title: <FormattedMessage id="delay-message"/>,
+            dataIndex: 'delayMessageStatus',
+            key: 'delayMessageStatus',
+            render: (delayMessageStatus, record, index) => {
+                return <Popover content={content} title="如何使用延迟消息服务？">
+                    <Switch checkedChildren="开启" unCheckedChildren="关闭" checked={delayMessageStatus === 'enabled'}
+                            onChange={async (checked) => {
+                                let url = `/clusters/${record['id']}/disableDelayMessage`;
+                                if (checked) {
+                                    url = `/clusters/${record['id']}/enableDelayMessage`;
+                                }
+                                await request.post(url);
+                                this.loadTableData()
+                            }
+                            }/>
+                </Popover>
+
+            }
+        }, {
+            title: <FormattedMessage id="topic"/>,
             dataIndex: 'topicCount',
             key: 'topicCount',
             render: (topicCount, record, index) => {
@@ -241,7 +289,7 @@ class Cluster extends Component {
                 </Link>
             }
         }, {
-            title: <FormattedMessage id="broker" />,
+            title: <FormattedMessage id="broker"/>,
             dataIndex: 'brokerCount',
             key: 'brokerCount',
             render: (brokerCount, record, index) => {
@@ -250,7 +298,7 @@ class Cluster extends Component {
                 </Link>
             }
         }, {
-            title: <FormattedMessage id="consumer-group" />,
+            title: <FormattedMessage id="consumer-group"/>,
             dataIndex: 'consumerCount',
             key: 'consumerCount',
             render: (consumerCount, record, index) => {
@@ -259,7 +307,7 @@ class Cluster extends Component {
                 </Link>
             }
         }, {
-            title: <FormattedMessage id="created" />,
+            title: <FormattedMessage id="created"/>,
             dataIndex: 'created',
             key: 'created',
             render: (text, record) => {
@@ -272,19 +320,19 @@ class Cluster extends Component {
             sorter: true,
         },
             {
-                title: <FormattedMessage id="operate" />,
+                title: <FormattedMessage id="operate"/>,
                 key: 'action',
                 render: (text, record, index) => {
                     return (
                         <div>
                             <Button type="link" size='small' onClick={() => {
-                                this.showModal(<FormattedMessage id="edit" />, record)
-                            }}><FormattedMessage id="edit" /></Button>
+                                this.showModal(<FormattedMessage id="edit"/>, record)
+                            }}><FormattedMessage id="edit"/></Button>
                             <Popconfirm
-                                title={<FormattedMessage id="delete-confirm" />}
+                                title={<FormattedMessage id="delete-confirm"/>}
                                 onConfirm={() => this.delete(record['id'])}
                             >
-                                <Button type="text" size='small' danger><FormattedMessage id="delete" /></Button>
+                                <Button type="text" size='small' danger><FormattedMessage id="delete"/></Button>
                             </Popconfirm>
                         </div>
                     )
@@ -307,7 +355,7 @@ class Cluster extends Component {
 
                     <Row justify="space-around" align="middle" gutter={24}>
                         <Col span={12} key={1}>
-                            <Title level={3}><FormattedMessage id="cluster" /></Title>
+                            <Title level={3}><FormattedMessage id="cluster"/></Title>
                         </Col>
                         <Col span={12} key={2} style={{textAlign: 'right'}}>
                             <Space>
@@ -318,7 +366,7 @@ class Cluster extends Component {
                                     onSearch={this.handleSearchByName}
                                 />
 
-                                <Tooltip title={<FormattedMessage id="reset" />}>
+                                <Tooltip title={<FormattedMessage id="reset"/>}>
 
                                     <Button icon={<UndoOutlined/>} onClick={() => {
                                         this.inputRefOfName.current.setValue('');
@@ -330,14 +378,14 @@ class Cluster extends Component {
 
                                 <Divider type="vertical"/>
 
-                                <Tooltip title={<FormattedMessage id="import-cluster" />}>
+                                <Tooltip title={<FormattedMessage id="import-cluster"/>}>
                                     <Button type="dashed" icon={<PlusOutlined/>}
-                                            onClick={() => this.showModal(<FormattedMessage id="import-cluster" />)}>
+                                            onClick={() => this.showModal(<FormattedMessage id="import-cluster"/>)}>
 
                                     </Button>
                                 </Tooltip>
 
-                                <Tooltip title={<FormattedMessage id="refresh" />}>
+                                <Tooltip title={<FormattedMessage id="refresh"/>}>
                                     <Button icon={<SyncOutlined/>} onClick={() => {
                                         this.loadTableData(this.state.queryParams)
                                     }}>
@@ -345,7 +393,7 @@ class Cluster extends Component {
                                     </Button>
                                 </Tooltip>
 
-                                <Tooltip title={<FormattedMessage id="batch-delete" />}>
+                                <Tooltip title={<FormattedMessage id="batch-delete"/>}>
                                     <Button type="primary" danger disabled={!hasSelected} icon={<DeleteOutlined/>}
                                             loading={this.state.delBtnLoading}
                                             onClick={() => {
@@ -386,7 +434,9 @@ class Cluster extends Component {
                         onChange: this.handleChangPage,
                         onShowSizeChange: this.handleChangPage,
                         total: this.state.total,
-                        showTotal: total => {return <FormattedMessage id="total-items" values={{total: total}}/>}
+                        showTotal: total => {
+                            return <FormattedMessage id="total-items" values={{total: total}}/>
+                        }
                     }}
                     loading={this.state.loading}
                 />

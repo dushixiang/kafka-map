@@ -115,7 +115,7 @@ public class ConsumerGroupService {
 
     public void resetOffset(String topic, String groupId, String clusterId, ResetOffset resetOffset) {
         Cluster cluster = clusterService.findById(clusterId);
-        try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(cluster.getServers(), groupId)) {
+        try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(cluster.getServers(), groupId, "earliest")) {
             TopicPartition topicPartition = new TopicPartition(topic, resetOffset.getPartition());
             List<TopicPartition> topicPartitions = Collections.singletonList(topicPartition);
 
@@ -213,8 +213,10 @@ public class ConsumerGroupService {
                                     OffsetAndMetadata offsetAndMetadata = topicPartitionOffsetAndMetadataMap.get(topicPartition);
                                     Long beginningOffset = beginningOffsets.get(topicPartition);
                                     Long endOffset = endOffsets.get(topicPartition);
-                                    long offset = offsetAndMetadata.offset();
-
+                                    Long offset = null;
+                                    if (offsetAndMetadata != null) {
+                                        offset = offsetAndMetadata.offset();
+                                    }
                                     ConsumerGroupDescribe consumerGroupDescribe = new ConsumerGroupDescribe();
                                     consumerGroupDescribe.setGroupId(groupId);
                                     consumerGroupDescribe.setTopic(topic);
@@ -222,7 +224,11 @@ public class ConsumerGroupService {
                                     consumerGroupDescribe.setCurrentOffset(offset);
                                     consumerGroupDescribe.setLogBeginningOffset(beginningOffset);
                                     consumerGroupDescribe.setLogEndOffset(endOffset);
-                                    consumerGroupDescribe.setLag(endOffset - offset);
+                                    if (endOffset != null && offset != null) {
+                                        consumerGroupDescribe.setLag(endOffset - offset);
+                                    } else {
+                                        consumerGroupDescribe.setLag(null);
+                                    }
                                     consumerGroupDescribe.setConsumerId(consumerId);
                                     consumerGroupDescribe.setHost(host);
                                     consumerGroupDescribe.setClientId(clientId);

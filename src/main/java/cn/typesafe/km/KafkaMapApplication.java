@@ -1,5 +1,6 @@
 package cn.typesafe.km;
 
+import cn.typesafe.km.service.ClusterService;
 import cn.typesafe.km.service.UserService;
 import lombok.SneakyThrows;
 import org.springframework.boot.CommandLineRunner;
@@ -31,9 +32,12 @@ public class KafkaMapApplication implements CommandLineRunner {
 
     @Resource
     private UserService userService;
+    @Resource
+    private ClusterService clusterService;
 
     @Override
     public void run(String... args) throws Exception {
         userService.initUser();
+        clusterService.restore();
     }
 }

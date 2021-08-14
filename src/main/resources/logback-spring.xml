@@ -78,6 +78,9 @@
         </encoder>
     </appender>
 
+    <logger name="org.apache.kafka" level="ERROR"/>
+    <logger name="cn.typesafe.km" level="DEBUG"/>
+
     <!-- 日志输出级别 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

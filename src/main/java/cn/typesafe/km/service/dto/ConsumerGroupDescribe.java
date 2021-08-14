@@ -11,10 +11,10 @@ public class ConsumerGroupDescribe {
     private String groupId;
     private String topic;
     private int partition;
-    private long currentOffset;
-    private long logBeginningOffset;
-    private long logEndOffset;
-    private long lag;
+    private Long currentOffset;
+    private Long logBeginningOffset;
+    private Long logEndOffset;
+    private Long lag;
     private String consumerId;
     private String host;
     private String clientId;

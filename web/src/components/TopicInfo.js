@@ -20,7 +20,7 @@ class TopicInfo extends Component {
         topicDataVisible: false,
         topicInfo: {
             'partitions': []
-        }
+        },
     }
 
     componentDidMount() {
@@ -36,6 +36,24 @@ class TopicInfo extends Component {
 
     handleTabChange(key) {
 
+    }
+
+    onTopicPartitionRef = (topicPartitionRef) => {
+        this.setState({
+            topicPartitionRef: topicPartitionRef
+        })
+    }
+
+    onTopicBrokerRef = (topicBrokerRef) => {
+        this.setState({
+            topicBrokerRef: topicBrokerRef
+        })
+    }
+
+    onTopicConsumerGroupRef = (topicConsumerGroupRef) => {
+        this.setState({
+            topicConsumerGroupRef: topicConsumerGroupRef
+        })
     }
 
     loadTopicInfo = async (clusterId, topic) => {
@@ -54,6 +72,15 @@ class TopicInfo extends Component {
         this.setState({
             modalVisible: false
         });
+        if (this.state.topicPartitionRef) {
+            this.state.topicPartitionRef.refresh();
+        }
+        if (this.state.topicBrokerRef) {
+            this.state.topicBrokerRef.refresh();
+        }
+        if (this.state.topicConsumerGroupRef) {
+            this.state.topicConsumerGroupRef.refresh();
+        }
         return true;
     }
 
@@ -75,7 +102,8 @@ class TopicInfo extends Component {
                                     modalVisible: true
                                 })
                             }}><FormattedMessage id="produce-message"/></Button>,
-                            <Link key={'link-2'} to={`/topic-data?clusterId=${this.state.clusterId}&topic=${this.state.topic}`}>
+                            <Link key={'link-2'}
+                                  to={`/topic-data?clusterId=${this.state.clusterId}&topic=${this.state.topic}`}>
                                 <Button key="btn-consume-message" type="primary">
                                     <FormattedMessage id="consume-message"/>
                                 </Button>
@@ -100,20 +128,26 @@ class TopicInfo extends Component {
                         <TabPane tab={<FormattedMessage id="partitions"/>} key="partition">
                             <TopicPartition
                                 clusterId={this.state.clusterId}
-                                topic={this.state.topic}>}
+                                topic={this.state.topic}
+                                onRef={this.onTopicPartitionRef}
+                            >
+
                             </TopicPartition>
                         </TabPane>
                         <TabPane tab={<FormattedMessage id="brokers"/>} key="broker">
                             <TopicBroker
                                 clusterId={this.state.clusterId}
-                                topic={this.state.topic}>
-
+                                topic={this.state.topic}
+                                onRef={this.onTopicBrokerRef}
+                            >
                             </TopicBroker>
                         </TabPane>
                         <TabPane tab={<FormattedMessage id="consumer-groups"/>} key="consumer-group">
                             <TopicConsumerGroup
                                 clusterId={this.state.clusterId}
-                                topic={this.state.topic}>
+                                topic={this.state.topic}
+                                onRef={this.onTopicConsumerGroupRef}
+                            >
 
                             </TopicConsumerGroup>
                         </TabPane>

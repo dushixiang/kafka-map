@@ -52,6 +52,7 @@ const en_US = {
     'produce-message': 'Produce Message',
     'pull': 'Pull',
     'newest': 'Newest',
+    'delay-message': 'Delay Message',
 }
 
 export default en_US;

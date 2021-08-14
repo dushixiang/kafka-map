@@ -10,7 +10,7 @@
     </parent>
     <groupId>cn.typesafe</groupId>
     <artifactId>kafka-map</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>kafka-map</name>
     <description>a simple kafka manager</description>
     <properties>
@@ -36,12 +36,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <scope>compile</scope>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>2.7.0</version>
-        </dependency>
 
         <dependency>
             <groupId>com.github.gwenn</groupId>
@@ -60,15 +54,27 @@
 
         <dependency>
             <scope>compile</scope>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
-            <version>5.4.6</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>30.1.1-jre</version>
         </dependency>
         <dependency>
             <scope>compile</scope>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>3.0.2</version>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <scope>compile</scope>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+        <dependency>
+            <scope>compile</scope>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>2.8.0</version>
         </dependency>
     </dependencies>
 

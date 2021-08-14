@@ -22,6 +22,7 @@ class TopicConsumerGroup extends Component {
             clusterId: clusterId,
             topic: topic
         })
+        this.props.onRef(this);
         this.loadItems(clusterId, topic);
     }
 
@@ -34,6 +35,12 @@ class TopicConsumerGroup extends Component {
             items: items,
             loading: false
         })
+    }
+
+    refresh() {
+        if (this.state.clusterId && this.state.topic) {
+            this.loadItems(this.state.clusterId, this.state.topic)
+        }
     }
 
     render() {

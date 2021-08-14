@@ -9,11 +9,18 @@ class TopicPartition extends Component {
     state = {
         loading: false,
         items: [],
+        clusterId: undefined,
+        topic: undefined
     }
 
     componentDidMount() {
         let clusterId = this.props.clusterId;
         let topic = this.props.topic;
+        this.setState({
+            clusterId: clusterId,
+            topic: topic
+        })
+        this.props.onRef(this);
         this.loadItems(clusterId, topic);
     }
 
@@ -26,6 +33,12 @@ class TopicPartition extends Component {
             items: items,
             loading: false
         })
+    }
+
+    refresh() {
+        if (this.state.clusterId && this.state.topic) {
+            this.loadItems(this.state.clusterId, this.state.topic)
+        }
     }
 
     render() {

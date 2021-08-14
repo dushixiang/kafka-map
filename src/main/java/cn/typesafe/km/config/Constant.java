@@ -6,4 +6,7 @@ package cn.typesafe.km.config;
  */
 public final class Constant {
     public static final String CONSUMER_GROUP_ID = "kafka-map";
+
+    public static final String DELAY_MESSAGE_ENABLED = "enabled";
+    public static final String DELAY_MESSAGE_DISABLED = "disabled";
 }

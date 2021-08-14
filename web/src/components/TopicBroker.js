@@ -13,6 +13,11 @@ class TopicBroker extends Component {
     componentDidMount() {
         let clusterId = this.props.clusterId;
         let topic = this.props.topic;
+        this.setState({
+            clusterId: clusterId,
+            topic: topic
+        })
+        this.props.onRef(this);
         this.loadItems(clusterId, topic);
     }
 
@@ -25,6 +30,12 @@ class TopicBroker extends Component {
             items: items,
             loading: false
         })
+    }
+
+    refresh() {
+        if (this.state.clusterId && this.state.topic) {
+            this.loadItems(this.state.clusterId, this.state.topic)
+        }
     }
 
     render() {
