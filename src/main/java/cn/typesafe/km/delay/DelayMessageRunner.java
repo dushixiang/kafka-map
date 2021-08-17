@@ -67,10 +67,12 @@ public class DelayMessageRunner implements Runnable {
     }
 
     public void shutdown() {
-        this.running = false;
         this.timer.cancel();
-        this.consumer.close();
-        this.producer.close();
+        this.running = false;
+        // 手动唤醒阻塞的线程使其退出循环
+        synchronized (lock) {
+            this.lock.notify();
+        }
     }
 
     @SneakyThrows
@@ -132,5 +134,10 @@ public class DelayMessageRunner implements Runnable {
                 }
             }
         } while (running);
+
+        this.consumer.close();
+        log.debug("close internal topic consumer");
+        this.producer.close();
+        log.debug("close internal topic producer");
     }
 }

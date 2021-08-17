@@ -76,6 +76,11 @@ public class DelayMessageListener implements Runnable {
                 }
             }
         } while (running);
+
+        consumer.close();
+        log.debug("close external topic consumer");
+        producer.close();
+        log.debug("close external topic producer");
     }
 
     public void shutdown() {
