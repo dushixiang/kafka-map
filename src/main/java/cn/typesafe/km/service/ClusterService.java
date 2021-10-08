@@ -107,12 +107,8 @@ public class ClusterService {
         for (String server : cluster.getServers().split(",")) {
             String[] split = server.split(":");
             String host = split[0];
-            boolean hostReachable = Networks.isHostReachable(host);
-            if (!hostReachable) {
-                throw new IllegalArgumentException("Host " + host + " is not reachable.");
-            }
             int port = Integer.parseInt(split[1]);
-            boolean hostConnected = Networks.isHostConnected(host, port);
+            boolean hostConnected = Networks.isHostConnected(host, port, 30000);
             if (!hostConnected) {
                 throw new IllegalArgumentException("server " + server + " can't connected.");
             }

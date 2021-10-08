@@ -255,6 +255,11 @@ class TopicData extends Component {
                         itemLayout="horizontal"
                         dataSource={this.state.items}
                         loading={this.state.loading}
+                        pagination={{
+                            showSizeChanger: true,
+                            total: this.state.items.length,
+                            showTotal: total => <FormattedMessage id="total-items" values={{total}}/>
+                        }}
                         renderItem={(item, index) => {
                             const title = <>
                                 <Space>
@@ -303,7 +308,6 @@ class TopicData extends Component {
                                     <pre>{item['format'] ? item['format'] : item['value']}</pre>
                                 </Col>
                             </Row>;
-
 
                             return <List.Item>
                                 <List.Item.Meta

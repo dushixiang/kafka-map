@@ -7,18 +7,18 @@ import java.net.Socket;
 
 public class Networks {
 
-    public static boolean isHostReachable(String host) {
+    public static boolean isHostReachable(String host, int timeout) {
         try {
-            return InetAddress.getByName(host).isReachable(1000);
+            return InetAddress.getByName(host).isReachable(timeout);
         } catch (IOException ignored) {
 
         }
         return false;
     }
 
-    public static boolean isHostConnected(String host, int port) {
+    public static boolean isHostConnected(String host, int port, int timeout) {
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(host, port), 3000);
+            socket.connect(new InetSocketAddress(host, port), timeout);
 //            InetAddress localAddress = socket.getLocalAddress();
 //            String hostName = localAddress.getHostName();
             return true;
