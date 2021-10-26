@@ -28,6 +28,15 @@ public class Cluster {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date created;
 
+    @Column(length = 200)
+    private String securityProtocol;
+    @Column(length = 200)
+    private String saslMechanism;
+    @Column(length = 200)
+    private String authUsername;
+    @Column(length = 200)
+    private String authPassword;
+
     @Transient
     private Integer topicCount;
     @Transient

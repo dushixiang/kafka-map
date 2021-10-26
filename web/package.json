@@ -1,6 +1,6 @@
 {
   "name": "kafka-map",
-  "version": "1.1.2",
+  "version": "1.2.0-beta",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",

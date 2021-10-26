@@ -106,7 +106,7 @@ public class MessageService {
     @SneakyThrows
     public long sendData(String clusterId, String topic, TopicData topicData) {
         Cluster cluster = clusterService.findById(clusterId);
-        KafkaProducer<String, String> kafkaProducer = clusterService.createProducer(cluster.getServers());
+        KafkaProducer<String, String> kafkaProducer = clusterService.createProducer(cluster.getServers(), cluster.getSecurityProtocol(), cluster.getSaslMechanism(), cluster.getAuthUsername(), cluster.getAuthPassword());
         ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic,topicData.getPartition(), topicData.getKey(), topicData.getValue());
         RecordMetadata recordMetadata = kafkaProducer.send(producerRecord).get();
         return recordMetadata.offset();

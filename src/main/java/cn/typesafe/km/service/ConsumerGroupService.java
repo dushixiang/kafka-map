@@ -115,7 +115,7 @@ public class ConsumerGroupService {
 
     public void resetOffset(String topic, String groupId, String clusterId, ResetOffset resetOffset) {
         Cluster cluster = clusterService.findById(clusterId);
-        try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(cluster.getServers(), groupId, "earliest")) {
+        try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(cluster.getServers(), groupId, "earliest", cluster.getSecurityProtocol(), cluster.getSaslMechanism(), cluster.getAuthUsername(), cluster.getAuthPassword())) {
             TopicPartition topicPartition = new TopicPartition(topic, resetOffset.getPartition());
             List<TopicPartition> topicPartitions = Collections.singletonList(topicPartition);
 

@@ -17,8 +17,10 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -48,20 +50,30 @@ public class ClusterService {
         return clusterRepository.findById(id).orElseThrow(() -> new NoSuchElementException("cluster 「" + id + "」does not exist"));
     }
 
-    private AdminClient createAdminClient(String servers) {
+    private AdminClient createAdminClient(String servers, String securityProtocol, String saslMechanism, String authUsername, String authPassword) {
         Properties properties = new Properties();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
         properties.put(AdminClientConfig.RETRIES_CONFIG, "0");
+        if (StringUtils.hasText(securityProtocol)) {
+            properties.put("security.protocol", securityProtocol);
+        }
+        if (StringUtils.hasText(saslMechanism)) {
+            properties.put("sasl.mechanism", saslMechanism);
+        }
+
+        if (StringUtils.hasText(authUsername) && StringUtils.hasText(authPassword)) {
+            properties.put("sasl.jaas.config", MessageFormat.format("org.apache.kafka.common.security.scram.ScramLoginModule required username=\"{0}\" password=\"{1}\";", authUsername, authPassword));
+        }
         return AdminClient.create(properties);
     }
 
     public KafkaConsumer<String, String> createConsumer(String clusterId) {
         Cluster cluster = findById(clusterId);
-        return createConsumer(cluster.getServers(), Constant.CONSUMER_GROUP_ID, "earliest");
+        return createConsumer(cluster.getServers(), Constant.CONSUMER_GROUP_ID, "earliest", cluster.getSecurityProtocol(), cluster.getSaslMechanism(), cluster.getAuthUsername(), cluster.getAuthPassword());
     }
 
-    public KafkaConsumer<String, String> createConsumer(String servers, String groupId, String autoOffsetResetConfig) {
+    public KafkaConsumer<String, String> createConsumer(String servers, String groupId, String autoOffsetResetConfig, String securityProtocol, String saslMechanism, String authUsername, String authPassword) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "100");
@@ -69,20 +81,40 @@ public class ClusterService {
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetResetConfig);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
+        if (StringUtils.hasText(securityProtocol)) {
+            properties.put("security.protocol", securityProtocol);
+        }
+        if (StringUtils.hasText(saslMechanism)) {
+            properties.put("sasl.mechanism", saslMechanism);
+        }
+
+        if (StringUtils.hasText(authUsername) && StringUtils.hasText(authPassword)) {
+            properties.put("sasl.jaas.config", MessageFormat.format("org.apache.kafka.common.security.scram.ScramLoginModule required username=\"{0}\" password=\"{1}\";", authUsername, authPassword));
+        }
         return new KafkaConsumer<>(properties, new StringDeserializer(), new StringDeserializer());
     }
 
-    public KafkaProducer<String, String> createProducer(String servers) {
+    public KafkaProducer<String, String> createProducer(String servers, String securityProtocol, String saslMechanism, String authUsername, String authPassword) {
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
+        if (StringUtils.hasText(securityProtocol)) {
+            properties.put("security.protocol", securityProtocol);
+        }
+        if (StringUtils.hasText(saslMechanism)) {
+            properties.put("sasl.mechanism", saslMechanism);
+        }
+
+        if (StringUtils.hasText(authUsername) && StringUtils.hasText(authPassword)) {
+            properties.put("sasl.jaas.config", MessageFormat.format("org.apache.kafka.common.security.scram.ScramLoginModule required username=\"{0}\" password=\"{1}\";", authUsername, authPassword));
+        }
         return new KafkaProducer<>(properties, new StringSerializer(), new StringSerializer());
     }
 
-    public AdminClient getAdminClient(String id, String servers) {
+    public AdminClient getAdminClient(String id, String servers, String securityProtocol, String saslMechanism, String authUsername, String authPassword) {
         synchronized (id.intern()) {
             AdminClient adminClient = clients.get(id);
             if (adminClient == null) {
-                adminClient = createAdminClient(servers);
+                adminClient = createAdminClient(servers, securityProtocol, saslMechanism, authUsername, authPassword);
                 clients.put(id, adminClient);
             }
             return adminClient;
@@ -94,7 +126,7 @@ public class ClusterService {
             AdminClient adminClient = clients.get(id);
             if (adminClient == null) {
                 Cluster cluster = findById(id);
-                adminClient = createAdminClient(cluster.getServers());
+                adminClient = createAdminClient(cluster.getServers(), cluster.getSecurityProtocol(), cluster.getSaslMechanism(), cluster.getAuthUsername(), cluster.getAuthPassword());
                 clients.put(id, adminClient);
             }
             return adminClient;
@@ -114,7 +146,7 @@ public class ClusterService {
             }
         }
 
-        AdminClient adminClient = getAdminClient(uuid, cluster.getServers());
+        AdminClient adminClient = getAdminClient(uuid, cluster.getServers(), cluster.getSecurityProtocol(), cluster.getSaslMechanism(), cluster.getAuthUsername(), cluster.getAuthPassword());
         String controller = adminClient.describeCluster().controller().get().host();
 
         cluster.setId(uuid);
