@@ -26,7 +26,7 @@ public class BrokerService {
     @Resource
     private TopicService topicService;
 
-//    public List<Broker> brokers() {
+    //    public List<Broker> brokers() {
 //
 //    }
     public int countBroker(String clusterId) throws ExecutionException, InterruptedException {
@@ -62,7 +62,7 @@ public class BrokerService {
             for (TopicPartitionInfo partitionInfo : partitions) {
                 Node leader = partitionInfo.leader();
                 for (Broker broker : brokers) {
-                    if (broker.getId() == leader.id()) {
+                    if (broker != null && broker.getId() == leader.id()) {
                         broker.getLeaderPartitions().add(partitionInfo.partition());
                         break;
                     }
