@@ -37,3 +37,7 @@ dashboard/*.iml
 dashboard/node_modules
 
 /data/kafka-map.db
+/logs/
+/screenshot/
+/src/
+/web/

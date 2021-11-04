@@ -1,6 +1,7 @@
 package cn.typesafe.km.service;
 
 import cn.typesafe.km.service.dto.Broker;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.admin.TopicDescription;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
  * @author dushixiang
  * @date 2021/4/2 20:45
  */
+@Slf4j
 @Service
 public class BrokerService {
 
@@ -62,7 +64,7 @@ public class BrokerService {
             for (TopicPartitionInfo partitionInfo : partitions) {
                 Node leader = partitionInfo.leader();
                 for (Broker broker : brokers) {
-                    if (broker != null && broker.getId() == leader.id()) {
+                    if (leader != null && broker.getId() == leader.id()) {
                         broker.getLeaderPartitions().add(partitionInfo.partition());
                         break;
                     }

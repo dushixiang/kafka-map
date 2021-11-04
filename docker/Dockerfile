@@ -6,8 +6,8 @@ ENV DEFAULT_PASSWORD admin
 
 WORKDIR /usr/local/kafka-map
 
-RUN wget https://github.com/dushixiang/kafka-map/releases/latest/download/kafka-map.tgz && \
-tar -zxvf kafka-map.tgz -C /usr/local/ && rm -rf kafka-map.tgz
+ADD kafka-map.jar .
+ADD LICENSE .
 
 EXPOSE $SERVER_PORT
 
