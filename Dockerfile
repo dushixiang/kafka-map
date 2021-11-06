@@ -24,7 +24,7 @@ ENV DEFAULT_PASSWORD admin
 WORKDIR /usr/local/kafka-map
 
 COPY --from=build /app/target/*.jar kafka-map.jar
-COPY --from=build /app/target/LICENSE LICENSE
+COPY --from=build /app/LICENSE LICENSE
 
 EXPOSE $SERVER_PORT
 
