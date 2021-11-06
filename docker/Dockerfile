@@ -1,4 +1,20 @@
-FROM openjdk:11.0.13-jre-buster
+#
+# Build stage
+#
+FROM maven:3.6.0-jdk-11-slim AS build
+
+WORKDIR /app
+
+COPY ../src .
+COPY ../pom.xml .
+COPY ../LICENSE .
+RUN mvn -f pom.xml clean package -Dmaven.test.skip=true
+
+
+#
+# Package stage
+#
+FROM openjdk:11-jre-slim
 
 ENV SERVER_PORT 8080
 ENV DEFAULT_USERNAME admin
@@ -6,8 +22,8 @@ ENV DEFAULT_PASSWORD admin
 
 WORKDIR /usr/local/kafka-map
 
-ADD ../target/kafka-map-*.jar kafka-map.jar
-ADD ../LICENSE .
+COPY --from=build /app/target/*.jar kafka-map.jar
+COPY --from=build /app/target/LICENSE LICENSE
 
 EXPOSE $SERVER_PORT
 
