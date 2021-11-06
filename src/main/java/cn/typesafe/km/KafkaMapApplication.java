@@ -3,6 +3,7 @@ package cn.typesafe.km;
 import cn.typesafe.km.service.ClusterService;
 import cn.typesafe.km.service.UserService;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Slf4j
 @EnableScheduling
 @SpringBootApplication
 public class KafkaMapApplication implements CommandLineRunner {
@@ -23,10 +25,11 @@ public class KafkaMapApplication implements CommandLineRunner {
     }
 
     @SneakyThrows
-    public static void initDatabaseDir(){
+    public static void initDatabaseDir() {
         Path dbPath = Paths.get("data");
         if (!Files.exists(dbPath)) {
             Files.createDirectory(dbPath);
+            log.debug("create dir: {}", dbPath);
         }
     }
 
