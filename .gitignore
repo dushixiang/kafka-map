@@ -36,8 +36,8 @@ dashboard/.idea
 dashboard/*.iml
 dashboard/node_modules
 
-/data/kafka-map.db
+/data/
 /logs/
 /screenshot/
-/src/
-/web/
+/src/main/web/build
+/src/main/web/node_modules
