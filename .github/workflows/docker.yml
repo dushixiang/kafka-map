@@ -1,8 +1,6 @@
-name: Maven Package
+name: Docker Image Build
 
 on:
-  release:
-    types: [created]
   workflow_dispatch:
 
 jobs:
@@ -25,3 +23,17 @@ jobs:
 
     - name: Build with Maven
       run: mvn clean package -Dmaven.test.skip=true --file pom.xml
+    - name: Docker Login
+      uses: docker/login-action@v1.10.0
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v2.7.0
+      with:
+        context: .
+        platforms: linux/arm64,linux/amd64
+        file: docker/Dockerfile
+        push: true
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/kafka-map:latest
