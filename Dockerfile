@@ -5,9 +5,10 @@ FROM maven:3.8.3-jdk-11 AS build
 
 WORKDIR /app
 
-COPY ../src .
-COPY ../pom.xml .
-COPY ../LICENSE .
+COPY src src
+COPY pom.xml pom.xml
+COPY LICENSE LICENSE
+
 RUN mvn -f pom.xml clean package -Dmaven.test.skip=true
 
 
