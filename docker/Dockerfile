@@ -1,4 +1,4 @@
-FROM openjdk:11.0.11-jre-buster
+FROM openjdk:11.0.13-jre-buster
 
 ENV SERVER_PORT 8080
 ENV DEFAULT_USERNAME admin
@@ -6,8 +6,8 @@ ENV DEFAULT_PASSWORD admin
 
 WORKDIR /usr/local/kafka-map
 
-ADD kafka-map.jar .
-ADD LICENSE .
+ADD ../target/kafka-map-*.jar kafka-map.jar
+ADD ../LICENSE .
 
 EXPOSE $SERVER_PORT
 
