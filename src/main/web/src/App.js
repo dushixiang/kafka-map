@@ -85,14 +85,14 @@ class App extends Component {
         const menu = (
             <Menu>
                 <Menu.Item>
-                    <a rel="noopener noreferrer" href="#" onClick={() => {
+                    <a href="/#" onClick={() => {
                         this.setLocale('zh-cn');
                     }}>
                         简体中文
                     </a>
                 </Menu.Item>
                 <Menu.Item>
-                    <a rel="noopener noreferrer" href="#" onClick={() => {
+                    <a href="/#" onClick={() => {
                         this.setLocale('en-us');
                     }}>
                         English
@@ -109,7 +109,7 @@ class App extends Component {
                     </Link>
                 </Menu.Item>
                 <Menu.Item>
-                    <a rel="noopener noreferrer" href="#" onClick={() => {
+                    <a href="/#" onClick={() => {
                         this.logout();
                     }}>
                         退出登录
