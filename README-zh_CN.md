@@ -1,6 +1,6 @@
 # kafka map
 
-[English](./README.MD) | 简体中文
+[English](./README.md) | 简体中文
 
 为编程插上翅膀，给`kafka`装上导航。
 
