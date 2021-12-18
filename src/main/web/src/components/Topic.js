@@ -331,7 +331,7 @@ class Topic extends Component {
                                 handleOk={this.handleOk}
                                 handleCancel={this.handleCancelModal}
                                 confirmLoading={this.state.modalConfirmLoading}
-                                model={this.state.model}
+                                model={null}
                                 brokerCount={this.state.brokerCount}
                             /> : undefined
                     }

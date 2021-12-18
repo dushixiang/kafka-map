@@ -31,17 +31,13 @@ class ConsumerGroup extends Component {
 
     state = {
         items: [],
-        selectedRowKeys: [],
         queryParams: {
             pageIndex: 1,
             pageSize: 10
         },
         loading: false,
-        modalVisible: false,
         clusterId: undefined,
         clusterName: undefined,
-        selectedRow: {},
-        createPartitionConfirmLoading: false
     }
 
     componentDidMount() {

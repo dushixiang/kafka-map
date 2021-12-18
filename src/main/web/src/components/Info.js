@@ -33,8 +33,7 @@ class Info extends Component {
 
     onNewPassword2Change = (value) => {
         this.setState({
-            ...this.validateNewPassword(value.target.value),
-            'newPassword2': value.target.value
+            ...this.validateNewPassword(value.target.value)
         })
     }
 

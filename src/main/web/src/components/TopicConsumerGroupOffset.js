@@ -32,8 +32,7 @@ class TopicConsumerGroupOffset extends Component {
         resetOffsetVisible: false,
         selectedRow: {},
         seek: 'end',
-        resetting: false,
-        createPartitionVisible: false
+        resetting: false
     }
 
     componentDidMount() {

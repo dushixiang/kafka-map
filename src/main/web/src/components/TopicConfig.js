@@ -33,6 +33,7 @@ class TopicConfig extends Component {
                 <List
                     itemLayout="horizontal"
                     dataSource={this.state.items}
+                    loading={this.state.loading}
                     renderItem={item => (
                         <List.Item>
                             <List.Item.Meta

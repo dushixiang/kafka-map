@@ -64,14 +64,22 @@ class TopicInfo extends Component {
     }
 
     handleSendMessage = async (values) => {
-        let offset = await request.post(`/topics/${this.state.topic}/data?clusterId=${this.state.clusterId}`, values);
-        notification['success']({
-            message: '提示',
-            description: `发送数据成功，位于 offset ${offset}。`,
-        });
         this.setState({
-            modalVisible: false
-        });
+            'modalConfirmLoading': true
+        })
+        try {
+            let offset = await request.post(`/topics/${this.state.topic}/data?clusterId=${this.state.clusterId}`, values);
+            notification['success']({
+                message: '提示',
+                description: `发送数据成功，位于 offset ${offset}。`,
+            });
+        } finally {
+            this.setState({
+                modalVisible: false,
+                modalConfirmLoading: true
+            });
+        }
+
         if (this.state.topicPartitionRef) {
             this.state.topicPartitionRef.refresh();
         }
@@ -81,6 +89,7 @@ class TopicInfo extends Component {
         if (this.state.topicConsumerGroupRef) {
             this.state.topicConsumerGroupRef.refresh();
         }
+
         return true;
     }
 

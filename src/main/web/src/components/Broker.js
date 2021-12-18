@@ -17,7 +17,6 @@ class Broker extends Component {
         let clusterId = urlParams.get('clusterId');
         let clusterName = urlParams.get('clusterName');
         this.setState({
-            clusterId: clusterId,
             clusterName: clusterName
         })
         this.loadItems(clusterId);

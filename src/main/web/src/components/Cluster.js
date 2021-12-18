@@ -93,9 +93,7 @@ class Cluster extends Component {
         } catch (e) {
             console.log(e);
         } finally {
-            const items = data.items.map(item => {
-                return {'key': item['id'], ...item}
-            })
+            const items = data.items;
             this.setState({
                 items: items,
                 total: data.total,
