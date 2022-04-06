@@ -1,4 +1,3 @@
-import {Alert} from "antd";
 import React from "react";
 
 const zh_CN = {

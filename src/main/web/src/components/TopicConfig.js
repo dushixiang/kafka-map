@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import request from "../common/request";
-import {Form, message, Space, Table, Tag, Typography} from "antd";
+import {Form, Space, Table, Tag, Typography} from "antd";
 import {Input} from "antd/lib/index";
 import {FormattedMessage} from "react-intl";
 
