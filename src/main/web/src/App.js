@@ -18,7 +18,7 @@ import en_US from './locales/en_US';
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import 'dayjs/locale/zh-cn';
-import {IntlProvider} from 'react-intl';
+import {FormattedMessage, IntlProvider} from 'react-intl';
 import Login from "./components/Login";
 import request from "./common/request";
 import {
@@ -105,14 +105,14 @@ class App extends Component {
             <Menu>
                 <Menu.Item>
                     <Link to={`/info`}>
-                        修改密码
+                        <FormattedMessage id="change-password"/>
                     </Link>
                 </Menu.Item>
                 <Menu.Item>
                     <a href="/#" onClick={() => {
                         this.logout();
                     }}>
-                        退出登录
+                        <FormattedMessage id="logout"/>
                     </a>
                 </Menu.Item>
             </Menu>

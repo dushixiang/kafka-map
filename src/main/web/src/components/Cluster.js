@@ -12,7 +12,7 @@ import {
     Input,
     Divider,
     Popconfirm,
-    Switch, Popover
+    Switch, Popover, Alert
 } from "antd";
 import dayjs from "dayjs";
 import request from "../common/request";
@@ -34,15 +34,16 @@ const {Title, Text} = Typography;
 
 const content = (
     <div>
-        <p>基于kafka的延迟消息服务，支持18个级别，1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h。</p>
-        <p>向主题：delay-message 投递以下格式的消息即可，level 范围:0-17 。</p>
+        <Alert style={{marginTop: 5, marginBottom: 10}} message={<FormattedMessage id="delay-message-information1"/>} type="info" showIcon/>
+        <p><FormattedMessage id="delay-message-information2"/></p>
+        <p><FormattedMessage id="delay-message-information3"/></p>
         <pre>
             {JSON.stringify({
                 "level": 0,
                 "topic": "target",
                 "key": "key",
                 "value": "value"
-            }, null,4)}
+            }, null, 4)}
         </pre>
     </div>
 );
@@ -262,8 +263,8 @@ class Cluster extends Component {
             dataIndex: 'delayMessageStatus',
             key: 'delayMessageStatus',
             render: (delayMessageStatus, record, index) => {
-                return <Popover content={content} title="如何使用延迟消息服务？">
-                    <Switch checkedChildren="开启" unCheckedChildren="关闭" checked={delayMessageStatus === 'enabled'}
+                return <Popover content={content}>
+                    <Switch checked={delayMessageStatus === 'enabled'}
                             onChange={async (checked) => {
                                 let url = `/clusters/${record['id']}/disableDelayMessage`;
                                 if (checked) {
@@ -396,8 +397,8 @@ class Cluster extends Component {
                                             loading={this.state.delBtnLoading}
                                             onClick={() => {
                                                 const content = <div>
-                                                    您确定要删除选中的<Text style={{color: '#1890FF'}}
-                                                                   strong>{this.state.selectedRowKeys.length}</Text>条记录吗？
+                                                    Are you sure delete <Text style={{color: '#1890FF'}}
+                                                                              strong>{this.state.selectedRowKeys.length}</Text> items?
                                                 </div>;
                                                 confirm({
                                                     icon: <ExclamationCircleOutlined/>,

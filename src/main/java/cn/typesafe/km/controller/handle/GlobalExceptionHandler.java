@@ -1,5 +1,6 @@
 package cn.typesafe.km.controller.handle;
 
+import org.apache.kafka.common.errors.InvalidRequestException;
 import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ResponseBody
     @ExceptionHandler(value = TopicExistsException.class)
-    public Map<String, Object> exceptionHandler(TopicExistsException e) {
+    public Map<String, Object> topicExistsException(TopicExistsException e) {
+        String message = e.getMessage();
+        Map<String, Object> data = new HashMap<>();
+        data.put("message", message);
+        return data;
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    @ExceptionHandler(value = InvalidRequestException.class)
+    public Map<String, Object> invalidRequestException(InvalidRequestException e) {
         String message = e.getMessage();
         Map<String, Object> data = new HashMap<>();
         data.put("message", message);

@@ -59,7 +59,7 @@ const ClusterModal = ({title, handleOk, handleCancel, confirmLoading, model}) =>
                         </Form.Item> : undefined
                 }
 
-                <Form.Item label={'安全协议'} name='securityProtocol'>
+                <Form.Item label={<FormattedMessage id="security-protocol"/>} name='securityProtocol'>
                     <Select allowClear>
                         <Select.Option value="PLAINTEXT">PLAINTEXT</Select.Option>
                         <Select.Option value="SSL">SSL</Select.Option>
@@ -68,7 +68,7 @@ const ClusterModal = ({title, handleOk, handleCancel, confirmLoading, model}) =>
                     </Select>
                 </Form.Item>
 
-                <Form.Item label={'协议机制'} name='saslMechanism'>
+                <Form.Item label={<FormattedMessage id="sasl-mechanism"/>} name='saslMechanism'>
                     <Select allowClear>
                         <Select.Option value="GSSAPI">GSSAPI</Select.Option>
                         <Select.Option value="PLAIN">PLAIN</Select.Option>
@@ -78,11 +78,11 @@ const ClusterModal = ({title, handleOk, handleCancel, confirmLoading, model}) =>
                     </Select>
                 </Form.Item>
 
-                <Form.Item label={'username'} name='authUsername'>
+                <Form.Item label={<FormattedMessage id="username"/>} name='authUsername'>
                     <Input placeholder="" maxLength={200}/>
                 </Form.Item>
 
-                <Form.Item label={'password'} name='authPassword'>
+                <Form.Item label={<FormattedMessage id="password"/>} name='authPassword'>
                     <Input placeholder="" maxLength={200}/>
                 </Form.Item>
             </Form>

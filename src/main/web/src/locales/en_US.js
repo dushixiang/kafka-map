@@ -1,3 +1,6 @@
+import {Alert} from "antd";
+import React from "react";
+
 const en_US = {
     "cluster": "Cluster",
     'reset': 'Reset',
@@ -18,10 +21,11 @@ const en_US = {
     'consumer-groups': 'Consumer Groups',
     'consumer-group-detail': 'Consumer Group Detail',
     'created': 'Created',
-    'operate': 'Operate',
+    'operate': 'Operation',
     'delete-confirm': 'Do you confirm that you want to delete this?',
     'okText': 'OK',
     'cancelText': 'Cancel',
+    'save': 'Save',
 
     'partitions': 'Partitions',
     'replicas': 'Replicas',
@@ -53,6 +57,16 @@ const en_US = {
     'pull': 'Pull',
     'newest': 'Newest',
     'delay-message': 'Delay Message',
+
+    'security-protocol': 'Security Protocol',
+    'sasl-mechanism': 'SASL Mechanism',
+    'username': 'Username',
+    'password': 'Password',
+    'change-password': 'Change Password',
+    'logout': 'Logout',
+    'delay-message-information1': 'Note: When enabled, 19 built-in topics are automatically created.',
+    'delay-message-information2': 'The delay message service based on Kafka supports 18 levels: 1s 5s 10s 30s 1M 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1H 2h.',
+    'delay-message-information3': 'Send message to topic: delay-message, level: 0-17.',
 }
 
 export default en_US;

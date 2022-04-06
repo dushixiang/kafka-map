@@ -9,6 +9,7 @@ import {getHeaders} from "../utils/utils";
 axios.defaults.baseURL = server;
 
 const handleError = (error) => {
+    console.log(error)
     if ("Network Error" === error.toString()) {
         message.error('网络异常');
         return false;
@@ -17,6 +18,7 @@ const handleError = (error) => {
         window.location.href = '#/login';
         return false;
     }
+
     if (error.response !== undefined) {
         let data = error.response.data;
         message.error(`${data.message}`, 10);

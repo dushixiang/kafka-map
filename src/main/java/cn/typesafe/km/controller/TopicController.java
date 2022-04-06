@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -105,5 +106,9 @@ public class TopicController {
         return topicService.getConfigs(topic, clusterId);
     }
 
+    @PutMapping("/{topic}/configs")
+    public void updateConfigs(@PathVariable String topic, @RequestParam String clusterId, @RequestBody Map<String, String> configs) throws ExecutionException, InterruptedException {
+        topicService.setConfigs(topic, clusterId, configs);
+    }
 
 }

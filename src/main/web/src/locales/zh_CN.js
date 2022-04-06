@@ -1,3 +1,6 @@
+import {Alert} from "antd";
+import React from "react";
+
 const zh_CN = {
     "cluster": "集群",
     'reset': '重置',
@@ -23,6 +26,7 @@ const zh_CN = {
     'delete-confirm': '您确认要删除此记录吗？',
     'okText': '确定',
     'cancelText': '取消',
+    'save': '保存',
 
     'partitions': '分区',
     'replicas': '副本',
@@ -54,6 +58,16 @@ const zh_CN = {
     'pull': '拉取',
     'newest': '最新',
     'delay-message': '延迟消息',
+
+    'security-protocol': '安全协议',
+    'sasl-mechanism': '协议机制',
+    'username': '账户',
+    'password': '密码',
+    'change-password': '修改密码',
+    'logout': '注销登录',
+    'delay-message-information1': '请注意：开启后会自动创建 19 个内置 Topic 。',
+    'delay-message-information2': '基于kafka的延迟消息服务，支持18个级别，1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h。',
+    'delay-message-information3': '发送消息到主题: delay-message，level: 0-17 。',
 }
 
 export default zh_CN;
