@@ -85,7 +85,7 @@ class ConsumerGroup extends Component {
             items: items
         })
         try {
-            await request.delete(`/consumerGroup/${groupId}?clusterId=${this.state.clusterId}`);
+            await request.delete(`/consumerGroups/${groupId}?clusterId=${this.state.clusterId}`);
             message.success('删除成功');
         } finally {
             this.loadTableData(this.state.queryParams);
