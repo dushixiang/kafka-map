@@ -5,7 +5,9 @@ import cn.typesafe.km.service.ConsumerGroupService;
 import cn.typesafe.km.service.MessageService;
 import cn.typesafe.km.service.TopicService;
 import cn.typesafe.km.service.dto.*;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -94,6 +96,14 @@ public class TopicController {
                                       String keyFilter,
                                       String valueFilter) {
         return messageService.data(clusterId, topic, partition, offset, count, keyFilter, valueFilter);
+    }
+
+    @GetMapping("/{topic}/data/live")
+    public Flux<ServerSentEvent<LiveMessage>> liveData(@PathVariable String topic, @RequestParam String clusterId,
+                                                                 @RequestParam(defaultValue = "0") Integer partition,
+                                                                 String keyFilter,
+                                                                 String valueFilter) {
+        return messageService.liveData(clusterId, topic, partition, keyFilter, valueFilter);
     }
 
     @PostMapping("/{topic}/data")

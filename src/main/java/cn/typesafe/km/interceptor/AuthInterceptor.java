@@ -31,6 +31,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String tokenHeader = request.getHeader("X-Auth-Token");
+        if (!StringUtils.hasText(tokenHeader)) {
+            tokenHeader = request.getParameter("X-Auth-Token");
+        }
+
         if (StringUtils.hasText(tokenHeader)) {
             User user = tokenManager.getIfPresent(tokenHeader);
             if (user != null) {

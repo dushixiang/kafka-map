@@ -1,5 +1,3 @@
-import React from "react";
-
 const en_US = {
     "cluster": "Cluster",
     'reset': 'Reset',
@@ -52,8 +50,10 @@ const en_US = {
     'earliest': 'Earliest',
     'customization': 'Customization',
     'consume-message': 'Consume Message',
+    'consume-message-live': 'Live Consume Message',
     'produce-message': 'Produce Message',
     'pull': 'Pull',
+    'stop': 'Stop',
     'newest': 'Newest',
     'delay-message': 'Delay Message',
 

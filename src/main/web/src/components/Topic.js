@@ -224,6 +224,12 @@ class Topic extends Component {
                                     </Button>
                                 </Link>
 
+                                <Link to={`/topic-data-live?clusterId=${this.state.clusterId}&topic=${record['name']}`}>
+                                    <Button key="2" type="link" size='small'>
+                                        <FormattedMessage id="consume-message-live" />
+                                    </Button>
+                                </Link>
+
                                 <Button type="link" size='small' onClick={() => {
                                     this.setState({
                                         createPartitionVisible: true,

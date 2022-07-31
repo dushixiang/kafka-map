@@ -25,6 +25,7 @@ import {
     GithubOutlined
 } from '@ant-design/icons';
 import Info from "./components/Info";
+import TopicDataLive from "./components/TopicDataLive";
 
 const {Header, Content, Footer} = Layout;
 
@@ -182,6 +183,7 @@ class App extends Component {
                                                 <Route path="/consumer-group-info" component={ConsumerGroupInfo}/>
                                                 <Route path="/topic-info" component={TopicInfo}/>
                                                 <Route path="/topic-data" component={TopicData}/>
+                                                <Route path="/topic-data-live" component={TopicDataLive}/>
                                                 <Route path="/info" component={Info}/>
                                             </Content>
                                         </Layout>

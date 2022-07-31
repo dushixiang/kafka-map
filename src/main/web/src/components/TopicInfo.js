@@ -117,6 +117,12 @@ class TopicInfo extends Component {
                                     <FormattedMessage id="consume-message"/>
                                 </Button>
                             </Link>,
+                            <Link key={'link-3'}
+                                  to={`/topic-data-live?clusterId=${this.state.clusterId}&topic=${this.state.topic}`}>
+                                <Button key="btn-consume-message" type="primary">
+                                    <FormattedMessage id="consume-message-live"/>
+                                </Button>
+                            </Link>,
                         ]}
                     >
                         <Row>

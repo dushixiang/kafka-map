@@ -1,5 +1,3 @@
-import React from "react";
-
 const zh_CN = {
     "cluster": "集群",
     'reset': '重置',
@@ -53,8 +51,10 @@ const zh_CN = {
     'earliest': '最早',
     'customization': '自定义',
     'consume-message': '拉取数据',
+    'consume-message-live': '实时拉取数据',
     'produce-message': '导入数据',
     'pull': '拉取',
+    'stop': '停止',
     'newest': '最新',
     'delay-message': '延迟消息',
 
