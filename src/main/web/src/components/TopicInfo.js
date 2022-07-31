@@ -65,7 +65,7 @@ class TopicInfo extends Component {
 
     handleSendMessage = async (values) => {
         this.setState({
-            'modalConfirmLoading': true
+            modalConfirmLoading: true
         })
         try {
             let offset = await request.post(`/topics/${this.state.topic}/data?clusterId=${this.state.clusterId}`, values);
@@ -76,7 +76,7 @@ class TopicInfo extends Component {
         } finally {
             this.setState({
                 modalVisible: false,
-                modalConfirmLoading: true
+                modalConfirmLoading: false
             });
         }
 
