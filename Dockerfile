@@ -2,20 +2,15 @@
 # Build stage
 #
 FROM maven:3.6.0-jdk-11-slim AS build
-
 WORKDIR /app
-
-COPY src src
-COPY pom.xml pom.xml
-COPY LICENSE LICENSE
-
-RUN mvn -f pom.xml clean package -Dmaven.test.skip=true
+COPY . ./
+RUN mvn -s settings.xml clean package -Dmaven.test.skip=true
 
 
 #
 # Package stage
 #
-FROM openjdk:11-jre-slim
+FROM openjdk:11.0.11-jre-slim
 
 ENV SERVER_PORT 8080
 ENV DEFAULT_USERNAME admin

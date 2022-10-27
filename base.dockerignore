@@ -1,9 +1,0 @@
-.github
-.idea
-data
-logs
-screenshot
-target
-src/main/web/node_modules/
-base.dockerignore
-README.md
