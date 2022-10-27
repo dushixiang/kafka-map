@@ -6,6 +6,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  webflux:
+    static-path-pattern: /static/**
+    base-path: /
 server:
   port: 8080
 

@@ -22,6 +22,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +36,8 @@ public class MessageService {
 
     @Resource
     private ClusterService clusterService;
+
+    private static final Duration POOLED_TIMEOUT = Duration.ofMillis(200);
 
     public List<ConsumerMessage> data(String clusterId, String topicName, Integer tPartition, Long startOffset, int count, String keyFilter, String valueFilter) {
         try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
@@ -50,59 +55,30 @@ public class MessageService {
             Long endOffset = kafkaConsumer.endOffsets(topicPartitions).get(topicPartition);
             long currentOffset = startOffset - 1;
 
-            List<ConsumerRecord<String, String>> records = new ArrayList<>(count);
+            List<ConsumerRecord<String, String>> filterRecords = new ArrayList<>(count);
 
             int emptyPoll = 0;
-            while (records.size() < count && currentOffset < endOffset) {
-                List<ConsumerRecord<String, String>> polled = kafkaConsumer.poll(Duration.ofMillis(200)).records(topicPartition);
+            while (filterRecords.size() < count && currentOffset < endOffset) {
+                List<ConsumerRecord<String, String>> polledMessages = kafkaConsumer.poll(POOLED_TIMEOUT).records(topicPartition);
 
-                if (!CollectionUtils.isEmpty(polled)) {
-
-                    for (ConsumerRecord<String, String> consumerRecord : polled) {
-                        if (StringUtils.hasText(keyFilter)) {
-                            String key = consumerRecord.key();
-                            if (StringUtils.hasText(key) && key.toLowerCase().contains(keyFilter.toLowerCase())) {
-                                records.add(consumerRecord);
-                            }
-                            continue;
-                        }
-
-                        if (StringUtils.hasText(valueFilter)) {
-                            String value = consumerRecord.value();
-                            if (StringUtils.hasText(value) && value.toLowerCase().contains(valueFilter.toLowerCase())) {
-                                records.add(consumerRecord);
-                            }
-                            continue;
-                        }
-                        records.add(consumerRecord);
+                if (!CollectionUtils.isEmpty(polledMessages)) {
+                    if (!CollectionUtils.isEmpty(polledMessages)) {
+                        filterRecords = polledMessages.stream()
+                                .filter(rec -> decideByKv().test(rec.key(), keyFilter) || decideByKv().test(rec.value(), valueFilter))
+                                .collect(Collectors.toList());
                     }
-                    currentOffset = polled.get(polled.size() - 1).offset();
+                    currentOffset = polledMessages.get(polledMessages.size() - 1).offset();
                     emptyPoll = 0;
                 } else if (++emptyPoll == 3) {
                     break;
                 }
             }
 
-            return records
-                .subList(0, Math.min(count, records.size()))
-                .stream()
-                .map(record -> {
-                    int partition = record.partition();
-                    long timestamp = record.timestamp();
-                    String key = record.key();
-                    String value = record.value();
-                    long offset = record.offset();
-
-                    ConsumerMessage consumerMessage = new ConsumerMessage();
-                    consumerMessage.setTopic(topicName);
-                    consumerMessage.setOffset(offset);
-                    consumerMessage.setPartition(partition);
-                    consumerMessage.setTimestamp(timestamp);
-                    consumerMessage.setKey(key);
-                    consumerMessage.setValue(value);
-
-                    return consumerMessage;
-                }).collect(Collectors.toList());
+            return filterRecords
+                    .subList(0, Math.min(count, filterRecords.size()))
+                    .stream()
+                    .map(rec -> toMessage(topicName).apply(rec))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -126,72 +102,81 @@ public class MessageService {
         kafkaConsumer.seek(topicPartition, endOffset);
 
         return Flux
-            .interval(Duration.ofSeconds(1))
-            .doFinally(x -> {
-                kafkaConsumer.close();
-            })
-            .map(sequence -> {
+                .interval(Duration.ofSeconds(1))
+                .doFinally(x -> {
+                    kafkaConsumer.close();
+                })
+                .map(sequence -> {
 
-                List<ConsumerRecord<String, String>> records = new ArrayList<>();
-
-                List<ConsumerRecord<String, String>> polled = kafkaConsumer.poll(Duration.ofMillis(200)).records(topicPartition);
-
-                if (!CollectionUtils.isEmpty(polled)) {
-
-                    for (ConsumerRecord<String, String> consumerRecord : polled) {
-                        if (StringUtils.hasText(keyFilter)) {
-                            String key = consumerRecord.key();
-                            if (StringUtils.hasText(key) && key.toLowerCase().contains(keyFilter.toLowerCase())) {
-                                records.add(consumerRecord);
-                            }
-                            continue;
-                        }
-
-                        if (StringUtils.hasText(valueFilter)) {
-                            String value = consumerRecord.value();
-                            if (StringUtils.hasText(value) && value.toLowerCase().contains(valueFilter.toLowerCase())) {
-                                records.add(consumerRecord);
-                            }
-                            continue;
-                        }
-                        records.add(consumerRecord);
+                    List<ConsumerRecord<String, String>> polledMessages = kafkaConsumer.poll(POOLED_TIMEOUT).records(topicPartition);
+                    List<ConsumerRecord<String, String>> filterRecords = new ArrayList<>();
+                    if (!CollectionUtils.isEmpty(polledMessages)) {
+                        filterRecords = polledMessages.stream()
+                                .filter(rec -> decideByKv().test(rec.key(), keyFilter) || decideByKv().test(rec.value(), valueFilter))
+                                .collect(Collectors.toList());
                     }
-                }
 
-                List<ConsumerMessage> data = records
-                    .stream()
-                    .map(record -> {
-                        int partition = record.partition();
-                        long timestamp = record.timestamp();
-                        String key = record.key();
-                        String value = record.value();
-                        long offset = record.offset();
+                    List<ConsumerMessage> data = filterRecords
+                            .stream()
+                            .map(rec -> toMessage(topicName).apply(rec))
+                            .collect(Collectors.toList());
 
-                        ConsumerMessage consumerMessage = new ConsumerMessage();
-                        consumerMessage.setTopic(topicName);
-                        consumerMessage.setOffset(offset);
-                        consumerMessage.setPartition(partition);
-                        consumerMessage.setTimestamp(timestamp);
-                        consumerMessage.setKey(key);
-                        consumerMessage.setValue(value);
+                    Long currBeginningOffset = kafkaConsumer.beginningOffsets(topicPartitions).get(topicPartition);
+                    Long currEndOffset = kafkaConsumer.endOffsets(topicPartitions).get(topicPartition);
 
-                        return consumerMessage;
-                    }).collect(Collectors.toList());
+                    LiveMessage liveMessage = new LiveMessage();
+                    liveMessage.setBeginningOffset(currBeginningOffset);
+                    liveMessage.setEndOffset(currEndOffset);
+                    liveMessage.setPartition(tPartition);
+                    liveMessage.setMessages(data);
 
-                Long currBeginningOffset = kafkaConsumer.beginningOffsets(topicPartitions).get(topicPartition);
-                Long currEndOffset = kafkaConsumer.endOffsets(topicPartitions).get(topicPartition);
+                    return ServerSentEvent.<LiveMessage>builder()
+                            .id(String.valueOf(sequence))
+                            .event("topic-message-event")
+                            .data(liveMessage)
+                            .build();
+                });
+    }
 
-                LiveMessage liveMessage = new LiveMessage();
-                liveMessage.setBeginningOffset(currBeginningOffset);
-                liveMessage.setEndOffset(currEndOffset);
-                liveMessage.setPartition(tPartition);
-                liveMessage.setMessages(data);
+    /**
+     * Filter out eligible Records based on the input key and value
+     *
+     * @return BiPredicate<String, String>
+     */
+    private BiPredicate<String, String> decideByKv() {
+        return (value, filterValue) -> {
+            value = Optional.ofNullable(value).orElse("");
+            filterValue = Optional.ofNullable(filterValue).orElse("");
+            if (StringUtils.hasText(value) || StringUtils.hasText(filterValue)) {
+                return value.toLowerCase().contains(filterValue);
+            }
+            return true;
+        };
+    }
 
-                return ServerSentEvent.<LiveMessage>builder()
-                    .id(String.valueOf(sequence))
-                    .event("topic-message-event")
-                    .data(liveMessage)
-                    .build();
-            });
+    /**
+     * Convert {@link ConsumerRecord}  to {@link ConsumerMessage}
+     *
+     * @param topicName topic name
+     * @return Function<ConsumerRecord < String, String>, ConsumerMessage>
+     */
+    private Function<ConsumerRecord<String, String>, ConsumerMessage> toMessage(String topicName) {
+        return rec -> {
+            int partition = rec.partition();
+            long timestamp = rec.timestamp();
+            String key = rec.key();
+            String value = rec.value();
+            long offset = rec.offset();
+
+            ConsumerMessage consumerMessage = new ConsumerMessage();
+            consumerMessage.setTopic(topicName);
+            consumerMessage.setOffset(offset);
+            consumerMessage.setPartition(partition);
+            consumerMessage.setTimestamp(timestamp);
+            consumerMessage.setKey(key);
+            consumerMessage.setValue(value);
+
+            return consumerMessage;
+        };
     }
 }

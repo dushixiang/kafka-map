@@ -9,4 +9,6 @@ public final class Constant {
 
     public static final String DELAY_MESSAGE_ENABLED = "enabled";
     public static final String DELAY_MESSAGE_DISABLED = "disabled";
+
+    public static final String HEADER_X_AUTH_TOKEN = "X-Auth-Token";
 }

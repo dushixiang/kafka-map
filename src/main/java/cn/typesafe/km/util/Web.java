@@ -1,23 +1,20 @@
 package cn.typesafe.km.util;
 
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Objects;
+/**
+ * @author huyaro
+ * @date 2022-10-27
+ */
+public interface Web {
 
-public class Web {
-
-    public static HttpServletRequest getRequest() {
-        return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
-    }
-
-    public static ServletContext getServletContext() {
-        return getRequest().getServletContext();
-    }
-
-    public static String getToken() {
-        return getRequest().getHeader("X-Auth-Token");
+    /**
+     * get token from request
+     *
+     * @param request http request
+     * @return token
+     */
+    static String getToken(ServerHttpRequest request) {
+        return request.getHeaders().getFirst("X-Auth-Token");
     }
 }
