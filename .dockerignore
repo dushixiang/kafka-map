@@ -1,5 +1,6 @@
 *
 !src
+!web/build
 !pom.xml
 !settings.xml
 !LICENSE

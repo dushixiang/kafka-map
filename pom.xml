@@ -82,7 +82,7 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/web/build</directory>
+                <directory>${project.basedir}/web</directory>
                 <targetPath>${project.build.outputDirectory}/public</targetPath>
                 <includes>
                     <include>*.json</include>
@@ -93,7 +93,7 @@
                 </includes>
             </resource>
             <resource>
-                <directory>src/main/web/build/static</directory>
+                <directory>${project.basedir}/web/static</directory>
                 <targetPath>${project.build.outputDirectory}/static</targetPath>
                 <includes>
                     <include>**/**</include>
@@ -105,6 +105,7 @@
             </resource>
         </resources>
 
+        <finalName>kafka-map</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

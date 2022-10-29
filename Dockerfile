@@ -4,6 +4,7 @@
 FROM maven:3.6.0-jdk-11-slim AS build
 WORKDIR /app
 COPY . ./
+COPY web/build ./web
 RUN mvn -s settings.xml clean package -Dmaven.test.skip=true
 
 
@@ -18,7 +19,7 @@ ENV DEFAULT_PASSWORD admin
 
 WORKDIR /usr/local/kafka-map
 
-COPY --from=build /app/target/*.jar kafka-map.jar
+COPY --from=build /app/target/kafka-map.jar kafka-map.jar
 COPY --from=build /app/LICENSE LICENSE
 
 EXPOSE $SERVER_PORT
