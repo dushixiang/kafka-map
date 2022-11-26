@@ -9,7 +9,7 @@ import org.apache.kafka.common.config.ConfigResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -127,7 +127,7 @@ public class TopicService {
             topicInfo.setPartitions(partitions);
 
 
-            List<Integer> brokerIds = brokerService.brokers(topicName, clusterId).stream().map(Broker::getId).collect(Collectors.toList());
+            List<Integer> brokerIds = brokerService.brokers(Set.of(topicName), clusterId).stream().map(Broker::getId).collect(Collectors.toList());
             Map<Integer, Map<String, LogDirDescription>> integerMapMap;
             try {
                 integerMapMap = adminClient.describeLogDirs(brokerIds).allDescriptions().get();
@@ -193,7 +193,7 @@ public class TopicService {
                 }
             }
 
-            List<Integer> brokerIds = brokerService.brokers(topicName, clusterId).stream().map(Broker::getId).collect(Collectors.toList());
+            List<Integer> brokerIds = brokerService.brokers(Set.of(topicName), clusterId).stream().map(Broker::getId).collect(Collectors.toList());
             Map<Integer, Map<String, LogDirDescription>> integerMapMap = null;
             try {
                 integerMapMap = adminClient.describeLogDirs(brokerIds).allDescriptions().get();
@@ -291,5 +291,33 @@ public class TopicService {
         data.put(configResource, alterConfigOps);
 
         adminClient.incrementalAlterConfigs(data).all().get();
+    }
+
+    public void deleteDelayMessageTopics(String clusterId){
+        List<String> topics = List.of(
+                "delay-message",
+                "__delay-seconds-1",
+                "__delay-seconds-5",
+                "__delay-seconds-10",
+                "__delay-seconds-30",
+                "__delay-minutes-1",
+                "__delay-minutes-2",
+                "__delay-minutes-3",
+                "__delay-minutes-4",
+                "__delay-minutes-5",
+                "__delay-minutes-6",
+                "__delay-minutes-7",
+                "__delay-minutes-8",
+                "__delay-minutes-9",
+                "__delay-minutes-10",
+                "__delay-minutes-20",
+                "__delay-minutes-30",
+                "__delay-hours-1",
+                "__delay-hours-2");
+        try {
+            deleteTopic(clusterId, topics);
+        } catch (ExecutionException | InterruptedException ignored) {
+
+        }
     }
 }

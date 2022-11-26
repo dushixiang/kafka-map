@@ -17,7 +17,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;

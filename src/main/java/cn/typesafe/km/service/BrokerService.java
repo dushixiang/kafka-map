@@ -1,6 +1,7 @@
 package cn.typesafe.km.service;
 
 import cn.typesafe.km.service.dto.Broker;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DescribeClusterResult;
@@ -8,9 +9,8 @@ import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartitionInfo;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -25,19 +25,14 @@ public class BrokerService {
 
     @Resource
     private ClusterService clusterService;
-    @Resource
-    private TopicService topicService;
 
-    //    public List<Broker> brokers() {
-//
-//    }
     public int countBroker(String clusterId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
         DescribeClusterResult describeClusterResult = adminClient.describeCluster();
         return describeClusterResult.nodes().get().size();
     }
 
-    public List<Broker> brokers(String topic, String clusterId) throws ExecutionException, InterruptedException {
+    public List<Broker> brokers(Set<String> topicNames, String clusterId) throws ExecutionException, InterruptedException {
 
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
         DescribeClusterResult describeClusterResult = adminClient.describeCluster();
@@ -51,13 +46,10 @@ public class BrokerService {
             brokers.add(broker);
         }
 
-        Set<String> topicNames;
-        if (StringUtils.hasText(topic)) {
-            topicNames = new HashSet<>(Collections.singletonList(topic));
-        } else {
-            topicNames = topicService.topicNames(clusterId);
-        }
 
+        if (CollectionUtils.isEmpty(topicNames)) {
+            topicNames = adminClient.listTopics().names().get();
+        }
         Map<String, TopicDescription> stringTopicDescriptionMap = adminClient.describeTopics(topicNames).all().get();
         for (TopicDescription topicDescription : stringTopicDescriptionMap.values()) {
             List<TopicPartitionInfo> partitions = topicDescription.partitions();
@@ -82,7 +74,7 @@ public class BrokerService {
             }
         }
 
-        if (StringUtils.hasText(topic)) {
+        if (!CollectionUtils.isEmpty(topicNames)) {
             // 使用topic过滤时只展示相关的broker
             brokers = brokers.stream()
                     .filter(broker -> broker.getFollowerPartitions().size() > 0 || broker.getLeaderPartitions().size() > 0)

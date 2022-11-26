@@ -3,14 +3,18 @@ package cn.typesafe.km.controller;
 import cn.typesafe.km.controller.dto.PageResult;
 import cn.typesafe.km.entity.Cluster;
 import cn.typesafe.km.repository.ClusterRepository;
+import cn.typesafe.km.service.BrokerService;
 import cn.typesafe.km.service.ClusterService;
+import cn.typesafe.km.service.ConsumerGroupService;
+import cn.typesafe.km.service.TopicService;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -23,6 +27,12 @@ public class ClusterController {
 
     @Resource
     private ClusterService clusterService;
+    @Resource
+    private TopicService topicService;
+    @Resource
+    private BrokerService brokerService;
+    @Resource
+    private ConsumerGroupService consumerGroupService;
     @Resource
     private ClusterRepository clusterRepository;
 
@@ -47,7 +57,12 @@ public class ClusterController {
 
     @GetMapping("/{clusterId}")
     public Cluster detail(@PathVariable String clusterId) throws ExecutionException, InterruptedException {
-        return clusterService.detail(clusterId);
+        Cluster cluster = clusterService.findById(clusterId);
+        Set<String> topicNames = topicService.topicNames(cluster.getId());
+        cluster.setTopicCount(topicNames.size());
+        cluster.setBrokerCount(brokerService.countBroker(cluster.getId()));
+        cluster.setConsumerCount(consumerGroupService.countConsumerGroup(cluster.getId()));
+        return cluster;
     }
 
     @GetMapping("")
@@ -80,5 +95,6 @@ public class ClusterController {
     @PostMapping("/{clusterId}/disableDelayMessage")
     public void disableDelayMessage(@PathVariable String clusterId) {
         clusterService.disableDelayMessage(clusterId);
+        topicService.deleteDelayMessageTopics(clusterId);
     }
 }

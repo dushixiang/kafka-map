@@ -9,7 +9,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +65,7 @@ public class TopicController {
 
     @GetMapping("/{topic}/brokers")
     public List<Broker> brokers(@PathVariable String topic, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
-        return brokerService.brokers(topic, clusterId);
+        return brokerService.brokers(Set.of(topic), clusterId);
     }
 
     @GetMapping("/{topic}/consumerGroups")

@@ -3,7 +3,7 @@ package cn.typesafe.km.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 /**

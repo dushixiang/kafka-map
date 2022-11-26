@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,12 +37,6 @@ public class ClusterService {
 
     @Resource
     private ClusterRepository clusterRepository;
-    @Resource
-    private TopicService topicService;
-    @Resource
-    private BrokerService brokerService;
-    @Resource
-    private ConsumerGroupService consumerGroupService;
 
     private final ConcurrentHashMap<String, DelayMessageHelper> store = new ConcurrentHashMap<>();
 
@@ -171,15 +165,6 @@ public class ClusterService {
         clusterRepository.saveAndFlush(cluster);
     }
 
-    public Cluster detail(String clusterId) throws ExecutionException, InterruptedException {
-        Cluster cluster = findById(clusterId);
-        Set<String> topicNames = topicService.topicNames(cluster.getId());
-        cluster.setTopicCount(topicNames.size());
-        cluster.setBrokerCount(brokerService.countBroker(cluster.getId()));
-        cluster.setConsumerCount(consumerGroupService.countConsumerGroup(cluster.getId()));
-        return cluster;
-    }
-
     @Transactional
     public void enableDelayMessage(String id) {
         Cluster cluster = findById(id);
@@ -204,32 +189,6 @@ public class ClusterService {
         delayMessageHelper.stop();
         cluster.setDelayMessageStatus(Constant.DELAY_MESSAGE_DISABLED);
         clusterRepository.saveAndFlush(cluster);
-
-        List<String> topics = List.of(
-            "delay-message",
-            "__delay-seconds-1",
-            "__delay-seconds-5",
-            "__delay-seconds-10",
-            "__delay-seconds-30",
-            "__delay-minutes-1",
-            "__delay-minutes-2",
-            "__delay-minutes-3",
-            "__delay-minutes-4",
-            "__delay-minutes-5",
-            "__delay-minutes-6",
-            "__delay-minutes-7",
-            "__delay-minutes-8",
-            "__delay-minutes-9",
-            "__delay-minutes-10",
-            "__delay-minutes-20",
-            "__delay-minutes-30",
-            "__delay-hours-1",
-            "__delay-hours-2");
-        try {
-            topicService.deleteTopic(id, topics);
-        } catch (ExecutionException | InterruptedException ignored) {
-
-        }
     }
 
     public void restore() {
