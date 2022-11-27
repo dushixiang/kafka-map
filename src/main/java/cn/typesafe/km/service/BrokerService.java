@@ -1,13 +1,13 @@
 package cn.typesafe.km.service;
 
 import cn.typesafe.km.service.dto.Broker;
+import cn.typesafe.km.service.dto.ServerConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.DescribeClusterResult;
-import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartitionInfo;
+import org.apache.kafka.common.config.ConfigResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -82,5 +82,45 @@ public class BrokerService {
         }
 
         return brokers;
+    }
+
+    public List<ServerConfig> getConfigs(String id, String clusterId) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+        ConfigResource configResource = new ConfigResource(ConfigResource.Type.BROKER, id);
+
+        Config config = adminClient.describeConfigs(Collections.singletonList(configResource)).all().get().get(configResource);
+
+        return config.entries()
+                .stream()
+                .map(entry -> {
+                    ServerConfig topicConfig = new ServerConfig();
+                    topicConfig.setName(entry.name());
+                    topicConfig.setValue(entry.value());
+                    topicConfig.set_default(entry.isDefault());
+                    topicConfig.setReadonly(entry.isReadOnly());
+                    topicConfig.setSensitive(entry.isSensitive());
+                    return topicConfig;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public void setConfigs(String id, String clusterId, Map<String, String> configs) throws ExecutionException, InterruptedException {
+        AdminClient adminClient = clusterService.getAdminClient(clusterId);
+        ConfigResource configResource = new ConfigResource(ConfigResource.Type.BROKER, id);
+
+        List<AlterConfigOp> alterConfigOps = configs.entrySet()
+                .stream()
+                .map(e -> {
+                    String key = e.getKey();
+                    String value = e.getValue();
+                    ConfigEntry configEntry = new ConfigEntry(key, value);
+                    return new AlterConfigOp(configEntry, AlterConfigOp.OpType.SET);
+                })
+                .collect(Collectors.toList());
+
+        Map<ConfigResource, Collection<AlterConfigOp>> data = new HashMap<>();
+        data.put(configResource, alterConfigOps);
+
+        adminClient.incrementalAlterConfigs(data).all().get();
     }
 }

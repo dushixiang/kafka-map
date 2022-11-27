@@ -253,7 +253,7 @@ public class TopicService {
     }
 
     @SneakyThrows
-    public List<TopicConfig> getConfigs(String topic, String clusterId) throws ExecutionException, InterruptedException {
+    public List<ServerConfig> getConfigs(String topic, String clusterId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
 
         ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, topic);
@@ -262,7 +262,7 @@ public class TopicService {
         return config.entries()
                 .stream()
                 .map(entry -> {
-                    TopicConfig topicConfig = new TopicConfig();
+                    ServerConfig topicConfig = new ServerConfig();
                     topicConfig.setName(entry.name());
                     topicConfig.setValue(entry.value());
                     topicConfig.set_default(entry.isDefault());

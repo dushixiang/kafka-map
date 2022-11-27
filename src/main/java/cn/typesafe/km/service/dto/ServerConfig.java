@@ -7,7 +7,7 @@ import lombok.Data;
  * @date 2021/4/24 3:20 下午
  */
 @Data
-public class TopicConfig {
+public class ServerConfig {
     private String name;
     private String value;
     private boolean _default;

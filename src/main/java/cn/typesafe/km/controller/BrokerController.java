@@ -2,13 +2,12 @@ package cn.typesafe.km.controller;
 
 import cn.typesafe.km.service.BrokerService;
 import cn.typesafe.km.service.dto.Broker;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import cn.typesafe.km.service.dto.ServerConfig;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -25,5 +24,15 @@ public class BrokerController {
     @GetMapping("")
     public List<Broker> brokers(@RequestParam String clusterId) throws ExecutionException, InterruptedException {
         return brokerService.brokers(null, clusterId);
+    }
+
+    @GetMapping("/{id}/configs")
+    public List<ServerConfig> configs(@PathVariable String id, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
+        return brokerService.getConfigs(id, clusterId);
+    }
+
+    @PutMapping("/{id}/configs")
+    public void updateConfigs(@PathVariable String id, @RequestParam String clusterId, @RequestBody Map<String, String> configs) throws ExecutionException, InterruptedException {
+        brokerService.setConfigs(id, clusterId, configs);
     }
 }

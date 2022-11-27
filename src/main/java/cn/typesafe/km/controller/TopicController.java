@@ -112,7 +112,7 @@ public class TopicController {
     }
 
     @GetMapping("/{topic}/configs")
-    public List<TopicConfig> getConfigs(@PathVariable String topic, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
+    public List<ServerConfig> getConfigs(@PathVariable String topic, @RequestParam String clusterId) throws ExecutionException, InterruptedException {
         return topicService.getConfigs(topic, clusterId);
     }
 
