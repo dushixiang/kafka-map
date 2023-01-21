@@ -6,7 +6,7 @@ Add wings to programming and install navigation to `kafka`。
 
 ## Introduction
 
-`kafka-map` is a `kafka` visualization tool developed using `Java11` and `React`.
+`kafka-map` is a `kafka` visualization tool developed using `Java17` and `React`.
 
 Supported features:
 

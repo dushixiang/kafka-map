@@ -6,7 +6,7 @@
 
 ## 简介
 
-`kafka-map`是使用`Java11`和`React`开发的一款`kafka`可视化工具。
+`kafka-map`是使用`Java17`和`React`开发的一款`kafka`可视化工具。
 
 目前支持的功能有：
 
