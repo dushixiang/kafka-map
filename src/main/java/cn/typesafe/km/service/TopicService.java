@@ -7,9 +7,11 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.*;
 import org.apache.kafka.common.config.ConfigResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import jakarta.annotation.Resource;
+
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -59,6 +61,10 @@ public class TopicService {
                     topic.setPartitionsCount(e.getValue().partitions().size());
                     topic.setTotalLogSize(0L);
                     topic.setReplicaCount(0);
+                    List<TopicPartitionInfo> partitions = e.getValue().partitions();
+                    if (!CollectionUtils.isEmpty(partitions)) {
+                        topic.setReplicaCount(partitions.get(0).replicas().size());
+                    }
                     return topic;
                 })
                 .collect(Collectors.toList());
@@ -85,7 +91,6 @@ public class TopicService {
                             }
                             ReplicaInfo replicaInfo = replicaInfoEntry.getValue();
                             long size = replicaInfo.size();
-                            topic.setReplicaCount(topic.getReplicaCount() + 1);
                             topic.setTotalLogSize(topic.getTotalLogSize() + size);
                         }
                     }
@@ -99,17 +104,18 @@ public class TopicService {
     public TopicInfo info(String clusterId, String topicName) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
         try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
-            TopicDescription topicDescription = adminClient.describeTopics(Collections.singletonList(topicName)).all().get().get(topicName);
+            TopicDescription topicDescription = adminClient.describeTopics(Collections.singletonList(topicName)).allTopicNames().get().get(topicName);
             TopicInfo topicInfo = new TopicInfo();
             topicInfo.setClusterId(clusterId);
             topicInfo.setName(topicName);
 
             List<TopicPartitionInfo> partitionInfos = topicDescription.partitions();
-            int replicaCount = 0;
-            for (TopicPartitionInfo topicPartitionInfo : partitionInfos) {
-                replicaCount += topicPartitionInfo.replicas().size();
+            if (!CollectionUtils.isEmpty(partitionInfos)) {
+                int replicaCount = partitionInfos.get(0).replicas().size();
+                topicInfo.setReplicaCount(replicaCount);
+            } else {
+                topicInfo.setReplicaCount(0);
             }
-            topicInfo.setReplicaCount(replicaCount);
 
             List<TopicPartition> topicPartitions = partitionInfos.stream().map(x -> new TopicPartition(topicName, x.partition())).collect(Collectors.toList());
             Map<TopicPartition, Long> beginningOffsets = kafkaConsumer.beginningOffsets(topicPartitions);
@@ -293,7 +299,7 @@ public class TopicService {
         adminClient.incrementalAlterConfigs(data).all().get();
     }
 
-    public void deleteDelayMessageTopics(String clusterId){
+    public void deleteDelayMessageTopics(String clusterId) {
         List<String> topics = List.of(
                 "delay-message",
                 "__delay-seconds-1",

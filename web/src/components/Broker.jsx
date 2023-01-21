@@ -121,7 +121,6 @@ class Broker extends Component {
                         dataSource={this.state.items}
                         columns={columns}
                         position={'both'}
-                        size={'small'}
                         loading={this.state.loading}
                         pagination={{
                             showSizeChanger: true,

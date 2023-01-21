@@ -9,6 +9,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.community.dialect.SQLiteDialect
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
 server:
   port: 8080
 

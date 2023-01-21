@@ -26,5 +26,9 @@
   {
     "name": "com.github.benmanes.caffeine.cache.PSAMS",
     "allDeclaredConstructors": true
+  },
+  {
+    "name": "org.hibernate.community.dialect.SQLiteDialect",
+    "allDeclaredConstructors": true
   }
 ]
