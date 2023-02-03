@@ -154,7 +154,7 @@ export const NT_PACKAGE = () => {
     // const version = _package.version;
     return {
         name: 'kafka-map',
-        version: 'v1.3.0'
+        version: 'v1.3.1'
     }
 }
 
