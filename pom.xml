@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.1</version>
+        <version>3.0.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -68,19 +68,19 @@
             <scope>compile</scope>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>3.1.2</version>
+            <version>3.1.5</version>
         </dependency>
         <dependency>
             <scope>compile</scope>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
-            <version>5.7.3</version>
+            <version>6.0.2</version>
         </dependency>
         <dependency>
             <scope>compile</scope>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>3.3.1</version>
+            <version>3.4.0</version>
         </dependency>
 
         <dependency>

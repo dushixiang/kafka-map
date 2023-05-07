@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     public Map<String, Object> timeoutException(TimeoutException e) {
         String message = e.getMessage();
         Map<String, Object> data = new HashMap<>();
-        data.put("message", "访问kafka broker节点超时");
+        data.put("message", "timeout, " + message);
         return data;
     }
 }

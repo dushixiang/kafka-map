@@ -20,7 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import jakarta.annotation.Resource;
+
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,12 +38,14 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class ClusterService {
 
-    private final ConcurrentHashMap<String, AdminClient> clients = new ConcurrentHashMap<>();
+    private final Map<String, AdminClient> clients = new HashMap<>();
 
     @Resource
     private ClusterRepository clusterRepository;
 
     private final ConcurrentHashMap<String, DelayMessageHelper> store = new ConcurrentHashMap<>();
+
+    private final Lock lock = new ReentrantLock();
 
     public Cluster findById(String id) {
         return clusterRepository.findById(id).orElseThrow(() -> new NoSuchElementException("cluster 「" + id + "」does not exist"));
@@ -106,26 +112,38 @@ public class ClusterService {
     }
 
     public AdminClient getAdminClient(String id, String servers, String securityProtocol, String saslMechanism, String authUsername, String authPassword) {
-        synchronized (id.intern()) {
-            AdminClient adminClient = clients.get(id);
-            if (adminClient == null) {
-                adminClient = createAdminClient(servers, securityProtocol, saslMechanism, authUsername, authPassword);
-                clients.put(id, adminClient);
+        AdminClient adminClient = clients.get(id);
+        if (adminClient == null) {
+            lock.lock();
+            try {
+                adminClient = clients.get(id);
+                if (adminClient == null) {
+                    adminClient = createAdminClient(servers, securityProtocol, saslMechanism, authUsername, authPassword);
+                    clients.put(id, adminClient);
+                }
+            } finally {
+                lock.unlock();
             }
-            return adminClient;
         }
+        return adminClient;
     }
 
     public AdminClient getAdminClient(String id) {
-        synchronized (id.intern()) {
-            AdminClient adminClient = clients.get(id);
-            if (adminClient == null) {
-                Cluster cluster = findById(id);
-                adminClient = createAdminClient(cluster.getServers(), cluster.getSecurityProtocol(), cluster.getSaslMechanism(), cluster.getAuthUsername(), cluster.getAuthPassword());
-                clients.put(id, adminClient);
+        AdminClient adminClient = clients.get(id);
+        if (adminClient == null) {
+            lock.lock();
+            try {
+                adminClient = clients.get(id);
+                if (adminClient == null) {
+                    Cluster cluster = findById(id);
+                    adminClient = createAdminClient(cluster.getServers(), cluster.getSecurityProtocol(), cluster.getSaslMechanism(), cluster.getAuthUsername(), cluster.getAuthPassword());
+                    clients.put(id, adminClient);
+                }
+            } finally {
+                lock.unlock();
             }
-            return adminClient;
         }
+        return adminClient;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -154,8 +172,13 @@ public class ClusterService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteByIdIn(List<String> idList) {
         for (String id : idList) {
-            clients.remove(id);
-            clusterRepository.deleteById(id);
+            lock.lock();
+            try {
+                clients.remove(id);
+                clusterRepository.deleteById(id);
+            }finally {
+                lock.unlock();
+            }
         }
     }
 
