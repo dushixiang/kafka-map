@@ -7,7 +7,7 @@ WORKDIR /app
 
 COPY web .
 
-RUN yarn && yarn build
+RUN yarn config set network-timeout 300000 && yarn && yarn build
 
 FROM maven:3-amazoncorretto-17 AS build
 
