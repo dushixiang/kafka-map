@@ -9,9 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/icons": "^4.8.0",
-    "@ant-design/pro-components": "^2.3.35",
-    "antd": "^5.0.1",
+    "@ant-design/icons": "5.1.4",
+    "@ant-design/pro-components": "2.6.8",
+    "antd": "5.7.3",
     "axios": "^0.21.1",
     "dayjs": "^1.10.4",
     "qs": "^6.10.1",
