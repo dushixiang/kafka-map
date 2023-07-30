@@ -84,7 +84,7 @@ Developers wishing to use `kafka-map` within a corporate network are advised to 
 
 ## Required
 
-- Java11 or higher
+- Java17 or higher
 - Apache Kafka 1.1.0 or higher
 
 ## install by docker

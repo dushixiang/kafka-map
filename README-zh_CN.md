@@ -84,7 +84,7 @@
 
 ## 依赖环境
 
-- Java11 或更高版本
+- Java17 或更高版本
 - Apache Kafka 1.1.0 或更高版本
 
 ## docker方式安装
@@ -143,6 +143,7 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
 
 重载系统服务&&设置开机启动&&启动服务&&查看状态

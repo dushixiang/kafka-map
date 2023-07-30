@@ -54,8 +54,8 @@ public class ClusterService {
     private AdminClient createAdminClient(String servers, String securityProtocol, String saslMechanism, String authUsername, String authPassword) {
         Properties properties = new Properties();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
-        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
-        properties.put(AdminClientConfig.RETRIES_CONFIG, "0");
+        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "30000");
+        properties.put(AdminClientConfig.RETRIES_CONFIG, "3");
         if (StringUtils.hasText(securityProtocol)) {
             properties.put("security.protocol", securityProtocol);
         }

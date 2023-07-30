@@ -1,5 +1,6 @@
 package cn.typesafe.km.controller.handle;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.InvalidRequestException;
 import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.errors.TopicExistsException;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -51,7 +53,8 @@ public class GlobalExceptionHandler {
     public Map<String, Object> timeoutException(TimeoutException e) {
         String message = e.getMessage();
         Map<String, Object> data = new HashMap<>();
-        data.put("message", "timeout, " + message);
+        data.put("message", message);
+        log.error("kafka timeout", e);
         return data;
     }
 }
