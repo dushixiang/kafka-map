@@ -2,9 +2,7 @@ package cn.typesafe.km.service;
 
 import cn.typesafe.km.entity.Cluster;
 import cn.typesafe.km.service.dto.*;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.ConsumerGroupDescription;
-import org.apache.kafka.clients.admin.ConsumerGroupListing;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -151,15 +149,28 @@ public class ConsumerGroupService {
                 .map(groupId -> {
                     ConsumerGroup consumerGroup = new ConsumerGroup();
                     consumerGroup.setGroupId(groupId);
-
                     ConsumerGroupDescription consumerGroupDescription = groups.get(groupId);
-                    Set<String> topics = consumerGroupDescription.members()
-                            .stream()
-                            .map(s -> s.assignment().topicPartitions())
-                            .flatMap(Collection::stream)
-                            .map(TopicPartition::topic)
-                            .collect(Collectors.toSet());
-                    consumerGroup.setTopics(topics);
+                    if (!consumerGroupDescription.isSimpleConsumerGroup()) {
+                        Set<String> topics = consumerGroupDescription.members()
+                                .stream()
+                                .map(s -> s.assignment().topicPartitions())
+                                .flatMap(Collection::stream)
+                                .map(TopicPartition::topic)
+                                .collect(Collectors.toSet());
+                        consumerGroup.setTopics(topics);
+                        return consumerGroup;
+                    }
+                    Map<TopicPartition, OffsetAndMetadata> topicPartitionOffsetAndMetadataMap=null;
+                    try {
+                        topicPartitionOffsetAndMetadataMap = adminClient.listConsumerGroupOffsets(groupId)
+                                .partitionsToOffsetAndMetadata()
+                                .get();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    } catch (ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                    consumerGroup.setTopics(topicPartitionOffsetAndMetadataMap.keySet().stream().map(TopicPartition::topic).collect(Collectors.toSet()));
                     return consumerGroup;
                 })
                 .collect(Collectors.toList());
@@ -190,7 +201,6 @@ public class ConsumerGroupService {
     public List<ConsumerGroupDescribe> describe(String clusterId, String groupId) throws ExecutionException, InterruptedException {
         AdminClient adminClient = clusterService.getAdminClient(clusterId);
         ConsumerGroupDescription consumerGroupDescription = adminClient.describeConsumerGroups(Collections.singletonList(groupId)).all().get().get(groupId);
-
         Map<TopicPartition, OffsetAndMetadata> topicPartitionOffsetAndMetadataMap = adminClient.listConsumerGroupOffsets(groupId)
                 .partitionsToOffsetAndMetadata()
                 .get();
@@ -198,45 +208,77 @@ public class ConsumerGroupService {
         try (KafkaConsumer<String, String> kafkaConsumer = clusterService.createConsumer(clusterId)) {
             Map<TopicPartition, Long> endOffsets = kafkaConsumer.endOffsets(topicPartitions);
             Map<TopicPartition, Long> beginningOffsets = kafkaConsumer.beginningOffsets(topicPartitions);
-
-            return consumerGroupDescription.members()
-                    .stream()
-                    .flatMap(consumer -> {
-                        return consumer.assignment().topicPartitions()
-                                .stream()
-                                .map(topicPartition -> {
-                                    String topic = topicPartition.topic();
-                                    int partition = topicPartition.partition();
-                                    String consumerId = consumer.consumerId();
-                                    String host = consumer.host();
-                                    String clientId = consumer.clientId();
-                                    OffsetAndMetadata offsetAndMetadata = topicPartitionOffsetAndMetadataMap.get(topicPartition);
-                                    Long beginningOffset = beginningOffsets.get(topicPartition);
-                                    Long endOffset = endOffsets.get(topicPartition);
-                                    Long offset = null;
-                                    if (offsetAndMetadata != null) {
-                                        offset = offsetAndMetadata.offset();
-                                    }
-                                    ConsumerGroupDescribe consumerGroupDescribe = new ConsumerGroupDescribe();
-                                    consumerGroupDescribe.setGroupId(groupId);
-                                    consumerGroupDescribe.setTopic(topic);
-                                    consumerGroupDescribe.setPartition(partition);
-                                    consumerGroupDescribe.setCurrentOffset(offset);
-                                    consumerGroupDescribe.setLogBeginningOffset(beginningOffset);
-                                    consumerGroupDescribe.setLogEndOffset(endOffset);
-                                    if (endOffset != null && offset != null) {
-                                        consumerGroupDescribe.setLag(endOffset - offset);
-                                    } else {
-                                        consumerGroupDescribe.setLag(null);
-                                    }
-                                    consumerGroupDescribe.setConsumerId(consumerId);
-                                    consumerGroupDescribe.setHost(host);
-                                    consumerGroupDescribe.setClientId(clientId);
-
-                                    return consumerGroupDescribe;
-                                });
-                    })
-                    .collect(Collectors.toList());
+            if (!consumerGroupDescription.isSimpleConsumerGroup()) {
+                return consumerGroupDescription.members()
+                        .stream()
+                        .flatMap(consumer -> {
+                            return consumer.assignment().topicPartitions()
+                                    .stream()
+                                    .map(topicPartition -> {
+                                        String topic = topicPartition.topic();
+                                        int partition = topicPartition.partition();
+                                        String consumerId = consumer.consumerId();
+                                        String host = consumer.host();
+                                        String clientId = consumer.clientId();
+                                        OffsetAndMetadata offsetAndMetadata = topicPartitionOffsetAndMetadataMap.get(topicPartition);
+                                        Long beginningOffset = beginningOffsets.get(topicPartition);
+                                        Long endOffset = endOffsets.get(topicPartition);
+                                        Long offset = null;
+                                        if (offsetAndMetadata != null) {
+                                            offset = offsetAndMetadata.offset();
+                                        }
+                                        ConsumerGroupDescribe consumerGroupDescribe = new ConsumerGroupDescribe();
+                                        consumerGroupDescribe.setGroupId(groupId);
+                                        consumerGroupDescribe.setTopic(topic);
+                                        consumerGroupDescribe.setPartition(partition);
+                                        consumerGroupDescribe.setCurrentOffset(offset);
+                                        consumerGroupDescribe.setLogBeginningOffset(beginningOffset);
+                                        consumerGroupDescribe.setLogEndOffset(endOffset);
+                                        if (endOffset != null && offset != null) {
+                                            consumerGroupDescribe.setLag(endOffset - offset);
+                                        } else {
+                                            consumerGroupDescribe.setLag(null);
+                                        }
+                                        consumerGroupDescribe.setConsumerId(consumerId);
+                                        consumerGroupDescribe.setHost(host);
+                                        consumerGroupDescribe.setClientId(clientId);
+                                        return consumerGroupDescribe;
+                                    });
+                        })
+                        .collect(Collectors.toList());
+            }
+            List<ConsumerGroupDescribe> results=new ArrayList<>();
+            for (TopicPartition topicPartition : topicPartitionOffsetAndMetadataMap.keySet()) {
+                String topic = topicPartition.topic();
+                int partition = topicPartition.partition();
+                //String consumerId = consumer.consumerId();
+                //String host = consumer.host();
+                //String clientId = consumer.clientId();
+                OffsetAndMetadata offsetAndMetadata = topicPartitionOffsetAndMetadataMap.get(topicPartition);
+                Long beginningOffset = beginningOffsets.get(topicPartition);
+                Long endOffset = endOffsets.get(topicPartition);
+                Long offset = null;
+                if (offsetAndMetadata != null) {
+                    offset = offsetAndMetadata.offset();
+                }
+                ConsumerGroupDescribe consumerGroupDescribe = new ConsumerGroupDescribe();
+                consumerGroupDescribe.setGroupId(groupId);
+                consumerGroupDescribe.setTopic(topic);
+                consumerGroupDescribe.setPartition(partition);
+                consumerGroupDescribe.setCurrentOffset(offset);
+                consumerGroupDescribe.setLogBeginningOffset(beginningOffset);
+                consumerGroupDescribe.setLogEndOffset(endOffset);
+                if (endOffset != null && offset != null) {
+                    consumerGroupDescribe.setLag(endOffset - offset);
+                } else {
+                    consumerGroupDescribe.setLag(null);
+                }
+                //consumerGroupDescribe.setConsumerId(consumerId);
+                //consumerGroupDescribe.setHost(host);
+                //consumerGroupDescribe.setClientId(clientId);
+                results.add( consumerGroupDescribe);
+            }
+            return results;
         }
     }
 }
