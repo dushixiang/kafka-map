@@ -4,6 +4,8 @@
 
 加入社区 Telegram群组 https://t.me/SharonNetwork 可参与公益募捐或群内抽奖免费使用。
 
+---
+
 # kafka map
 
 English | [简体中文](./README-zh_CN.md)
