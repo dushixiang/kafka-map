@@ -1,8 +1,10 @@
-# 本项目 CDN 加速及安全防护由 Tencent EdgeOne 赞助
+### SharonNetworks
 
-[官网链接：亚洲最佳CDN、边缘和安全解决方案 - Tencent EdgeOne](https://edgeone.ai/zh?from=github)
+亚太数据中心提供顶级的中国优化网络接入 · 低延时&高带宽&提供Tbps级本地清洗高防服务, 为您的业务保驾护航, 为您的客户提供极致体验.
 
-![Logo](https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png)
+加入社区 Telegram群组 https://t.me/SharonNetwork 可参与公益募捐或群内抽奖免费使用。
+
+---
 
 # kafka map
 
